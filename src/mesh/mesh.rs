@@ -1,11 +1,17 @@
 use std::fs::read_to_string;
 
 use glium::{implement_vertex, VertexBuffer};
+use my_rust_matrix_lib::my_matrix_lib::prelude::{Matrix, SquaredMatrixTrait, VectorMath};
+
+use crate::math::*;
 
 #[derive(Clone, Copy,Debug)]
 pub struct Vertex{
     pub position : [f32;4],
-}implement_vertex!(Vertex,position);
+}
+
+implement_vertex!(Vertex,position);
+
 
 impl Vertex {
     #[allow(dead_code)]
@@ -15,14 +21,19 @@ impl Vertex {
         }
     }
 
-    fn transform(&mut self, trans_mat:[[f32;4];4]){
-        for i in 0..4{
-            let mut y = 0.;
-            for k in 0..4{
-                y+= trans_mat[i][k]*self.position[k];
-            }
-            self.position[i] = y;
-        }
+    #[inline]
+    pub fn transform(&mut self, trans_mat:Matrix<f32,4,4>){
+        self.position_as_mut_vec_math().dot_assign(trans_mat);
+    }
+    
+    #[inline]#[allow(dead_code)]
+    fn position_as_vec_math(&self)->&VectorMath<f32,4>{
+        (&self.position).into()
+    }
+    
+    #[inline]
+    fn position_as_mut_vec_math(&mut self)->&mut VectorMath<f32,4>{
+        (&mut self.position).into()
     }
 }
 
@@ -42,6 +53,19 @@ impl From<[f32;4]> for Vertex{
     }
 }
 
+impl From<VectorMath<f32,3>> for Vertex {
+    fn from(vec: VectorMath<f32,3>) -> Self {
+        Vertex { position: [vec[0],vec[1],vec[2],1.] }
+    }
+}
+
+impl From<VectorMath<f32,4>> for Vertex {
+    fn from(vec: VectorMath<f32,4>) -> Self {
+        Vertex { position: [vec[0],vec[1],vec[2],vec[3]] }
+    }
+}
+
+
 impl From<Vec<f32>> for Vertex{
     fn from(value: Vec<f32>) -> Self {
         let mut it = value.into_iter();
@@ -60,8 +84,7 @@ impl From<Vec<f32>> for Vertex{
 #[allow(dead_code)]
 pub struct Mesh{
 
-    size : f32,
-    position : [f32;3],
+    trans_mat : Matrix<f32,4,4>,
 
     vertecies :Vec<Vertex>,
     vertex_indices :Vec<usize>
@@ -72,8 +95,7 @@ pub struct Mesh{
 impl From<Vec<Vertex>> for Mesh{
     fn from(vertecies: Vec<Vertex>) -> Self {
         Mesh{
-            size :1.,
-            position:[0.;3],
+            trans_mat : Matrix::identity(),
 
             vertecies,
             vertex_indices:vec![]
@@ -98,64 +120,54 @@ impl From<Vec<[f32;4]>> for Mesh{
 
 
 impl Mesh {
+    #[inline]
     pub fn empty_mesh()->Mesh {
-        Mesh{
-            size : 1.,
-            position :[0.;3],
-
-            vertecies:vec![],
-            vertex_indices:vec![]
-        }
+        let vec: Vec<Vertex> = vec![];
+        Self::from(vec)
     }
 
+    #[inline]
     pub fn into_vertex_slice(&self)->&[Vertex]{
-        self.vertecies.as_slice()
+        &self.vertecies.as_slice()
     }
 
-    pub fn scale_applied(&mut self, scalar:f32){
-        for vertex in self.vertecies.iter_mut(){
-            for i in 0..4{
-                vertex.position[i] = vertex.position[i] * scalar;
-
-            }
-        }
+    #[inline]
+    pub fn scale(&mut self, scalar:f32){
+        self.trans_mat *= scalar;
     }
 
+    #[inline]
     pub fn load_into_vertex_buffer(&self,buffer :& VertexBuffer<Vertex>){
         buffer.write(self.into_vertex_slice());
     }
 
-    fn transform(&mut self, trans_mat :[[f32;4];4]){
-        for vertex in self.vertecies.iter_mut(){
-            vertex.transform(trans_mat);
-        }
+    #[inline]
+    pub fn transform_with_matrix(&mut self, trans_mat :Matrix<f32,4,4>){
+        self.trans_mat *= trans_mat;
     }
 
-    pub fn rotate_z(&mut self,theta:f32){
-        let theta = theta % (2.*std::f32::consts::PI);
-        let trans_mat = [
-            [theta.cos(),-theta.sin(),0.,0.],
-            [theta.sin(),theta.cos(),0.,0.],
-            [0.,0.,1.,0.],
-            [0.,0.,0.,1.]
-        ];
-
-
-        self.transform(trans_mat);
+    #[inline]
+    pub fn rotate_x(&mut self,theta:f32){
+        self.trans_mat *= x_rotation_mat(theta);
     }
 
+    #[inline]
     pub fn rotate_y(&mut self,theta:f32){
-        let theta = theta % (2.*std::f32::consts::PI);
-        let trans_mat = [
-            [theta.cos(),0.,theta.sin(),0.],
-            [0.,1.,0.,0.],
-            [-theta.sin(),0.,theta.cos(),0.],
-            [0.,0.,0.,1.]
-        ];
-
-
-        self.transform(trans_mat);
+        self.trans_mat *= y_rotation_mat(theta);
     }
+
+    #[inline]
+    pub fn rotate_z(&mut self,theta:f32){
+        self.trans_mat *= z_rotation_mat(theta);
+    }
+
+    pub fn apply_transform(&mut self){
+        for vert in self.vertecies.iter_mut(){
+            vert.transform(self.trans_mat);
+        }
+        self.trans_mat = Matrix::identity();
+    }
+
 
 }
 

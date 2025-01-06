@@ -22,8 +22,13 @@ impl Vertex {
     }
 
     #[inline]
-    pub fn transform(&mut self, trans_mat:Matrix<f32,4,4>){
+    pub fn apply_transform(&mut self, trans_mat:Matrix<f32,4,4>){
         self.position_as_mut_vec_math().dot_assign(trans_mat);
+    }
+
+    #[inline]
+    pub fn transform(&self, trans_mat:&Matrix<f32,4,4>)->Self{
+        (*self.position_as_vec_math()* *trans_mat).into()
     }
     
     #[inline]#[allow(dead_code)]
@@ -127,8 +132,13 @@ impl Mesh {
     }
 
     #[inline]
-    pub fn into_vertex_slice(&self)->&[Vertex]{
+    pub fn as_vertex_slice(&self)->&[Vertex]{
         &self.vertecies.as_slice()
+    }
+
+    #[inline]
+    pub fn as_mut_vertex_slice(&mut self)->&mut [Vertex]{
+        self.vertecies.as_mut_slice()
     }
 
     #[inline]
@@ -138,7 +148,13 @@ impl Mesh {
 
     #[inline]
     pub fn load_into_vertex_buffer(&self,buffer :& VertexBuffer<Vertex>){
-        buffer.write(self.into_vertex_slice());
+        let mut vec: Vec<Vertex> = Vec::with_capacity(self.vertecies.len());
+        for vert in &self.vertecies {
+            vec.push(vert.transform(&self.trans_mat));
+        }
+
+        
+        buffer.write(&vec);
     }
 
     #[inline]
@@ -163,7 +179,7 @@ impl Mesh {
 
     pub fn apply_transform(&mut self){
         for vert in self.vertecies.iter_mut(){
-            vert.transform(self.trans_mat);
+            vert.apply_transform(self.trans_mat);
         }
         self.trans_mat = Matrix::identity();
     }

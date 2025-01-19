@@ -7,11 +7,11 @@ use super::vertex::Vertex;
 
 #[derive(Debug,Clone)]
 pub struct Mesh{
-    vertecies : Vec<Vertex>,
+    pub(crate) vertecies : Vec<Vertex>,
 
-    position : Vec3,
-    scale : Vec3,
-    rotation:QuatF32,
+    pub(crate) position : Vec3,
+    pub(crate) scale : Vec3,
+    pub(crate) rotation:QuatF32,
 }
 
 impl SceneObject for Mesh {

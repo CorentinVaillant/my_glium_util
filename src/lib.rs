@@ -3,5 +3,5 @@
 pub mod camera;
 pub mod app;
 pub mod mesh;
-pub mod math;
+pub mod utils;
 pub mod object_traits;

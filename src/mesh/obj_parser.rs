@@ -16,6 +16,11 @@ struct FaceDataTripelet{
 type FaceData = Vec<FaceDataTripelet>;
 
 impl Mesh {
+
+    /* Note 
+    *   -> Obj index start with 1.
+    */
+
     pub fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> {
         
 
@@ -121,15 +126,27 @@ fn parse_tree_float(line: &str,default:f32) -> [f32; 3] {
 use core::str::FromStr;
 
 fn parse_face(line:&str)->Result<FaceData,WavefrontError>{
+
+    //remove all the comments on the line
+    let line = match line.split_once('#') {
+        Some((before_comment, _)) => before_comment.trim(),
+        None => line.trim(),
+    };
+
+    //separate each element to be treat
     let split: Vec<&str> = line.split(' ').collect();
 
+    //split(0) == 'f'
     if split.get(0).is_none_or(|c|{*c!="f"}){
         debug_println!("face line \"{}\" is invalide",line);
         return Err(WavefrontError::InvalidFaceData);
     }
+
     let mut face_data = Vec::new();
 
+    //treating every triplet
     for str_triplet in &split[1..] {
+
         let mut indices = str_triplet.split('/');
         let geo_vert_index = indices.next()
             .and_then(|v| u32::from_str(v).ok())

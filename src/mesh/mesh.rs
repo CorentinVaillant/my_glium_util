@@ -5,9 +5,11 @@ use crate::utils::types_util::{QuatF32, Vec3};
 
 use super::vertex::Vertex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Mesh {
     pub(crate) vertecies: Vec<Vertex>,
+    pub(crate) indices : Option<Vec<[u32; 3]>>, 
+    pub(crate) texture : Option<glium::texture::Texture2d>, //? idk
 
     pub(crate) position: Vec3,
     pub(crate) scale: Vec3,
@@ -87,6 +89,9 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
         let vertecies = value.into();
         Self {
             vertecies,
+            indices :None,
+            texture :None,
+
             position: Vec3::v_space_zero(),
             scale: [1., 1., 1.].into(),
             rotation: QuatF32::zero(),
@@ -97,5 +102,9 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
 impl Mesh {
     pub fn empty() -> Self {
         vec![].into()
+    }
+
+    pub fn from_verts_and_indices(vertecies : Vec<Vertex>, indices : Vec<[u32; 3]>)->Self{
+        Self { vertecies, indices: Some(indices) ,texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::zero() }
     }
 }

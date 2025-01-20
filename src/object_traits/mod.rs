@@ -1,5 +1,4 @@
 use crate::utils::types_util::{QuatF32, Vec3};
-
 pub trait SceneObject {
     fn translate(&mut self, trans: Vec3);
     fn set_position(&mut self, pos: Vec3);
@@ -22,4 +21,13 @@ pub trait SceneObject {
         self.apply_scale();
         self.apply_rotation();
     }
+}
+
+
+
+
+pub trait Drawable {
+    type DrawError;
+
+    fn draw(&self)->Result<(),Self::DrawError>;
 }

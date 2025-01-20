@@ -5,9 +5,9 @@ use crate::utils::types_util::{Arr3F32, QuatF32, Vec3};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
-    position: Arr3F32,
-    normal: Arr3F32,
-    texture: Arr3F32,
+    pub(crate) position: Arr3F32,
+    pub(crate) normal: Arr3F32,
+    pub(crate) texture: Arr3F32,
 }
 
 implement_vertex!(Vertex, position, normal, texture);

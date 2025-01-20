@@ -5,7 +5,7 @@ use std::{fs::read_to_string, path::Path};
 
 use crate::utils::macro_util::debug_println;
 
-use super::mesh::Mesh;
+use super::{mesh::Mesh, vertex::Vertex};
 
 struct FaceDataTripelet{
     geo_vert_index      : u32,
@@ -22,12 +22,10 @@ impl Mesh {
     */
 
     pub fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> {
-        
-
         let mut geo_vert_data = vec![];
         let mut texture_vert_data = vec![];
         let mut vertex_normal_data = vec![];
-        let mut parameter_space_vertex = vec![];
+        //let mut _parameter_space_vertex = vec![];
         let mut faces_data = vec![];
         
 
@@ -39,7 +37,7 @@ impl Mesh {
                 WaveFrontLineType::GeoVertex            => geo_vert_data.push(parse_tree_float(line,0.,)),
                 WaveFrontLineType::TextureVertex        => texture_vert_data.push(parse_tree_float(line,0.)),
                 WaveFrontLineType::VertexNormal         => vertex_normal_data.push(parse_tree_float(line,0.)),
-                WaveFrontLineType::ParameterSpaceVert   => parameter_space_vertex.push(parse_tree_float(line,1.)),
+                WaveFrontLineType::ParameterSpaceVert   => debug_println!("Point not implemented yet"),//replace with : => _parameter_space_vertex.push(parse_tree_float(line,1.)),
                 WaveFrontLineType::Point                => debug_println!("Point not implemented yet"),
                 WaveFrontLineType::Line                 => debug_println!("Line not implemented yet"),
                 WaveFrontLineType::Face                 => faces_data.push(parse_face(line)?),
@@ -49,8 +47,25 @@ impl Mesh {
             }
         }
 
-        let vertecies = vec![];
-        Ok(Mesh::from(vertecies))
+        let mut vertecies = Vec::with_capacity(geo_vert_data.len());
+
+        for ((position,texture),normal) in geo_vert_data.into_iter().zip(texture_vert_data).into_iter().zip(vertex_normal_data){
+            vertecies.push(Vertex{
+                position,
+                normal,
+                texture
+            });
+        }
+
+        let mut indices = Vec::new();
+
+        for face in faces_data{
+            let face_indices:Vec<u32> = face.into_iter().map(|triplet| triplet.geo_vert_index).collect();
+            indices.extend(triangulate_face(&face_indices));
+        }
+
+
+        Ok(Mesh::from_verts_and_indices(vertecies, indices))
     }
 }
 
@@ -60,6 +75,13 @@ pub enum WavefrontError {
     InvalidFaceData,
 }
 
+fn triangulate_face(indices :&[u32])->Vec<[u32;3]>{
+    let mut triangle = Vec::new();
+    for i in 1..(indices.len() -1){
+        triangle.push([indices[0],indices[i],indices[i+1]]);
+    }
+    triangle
+}
 
 
 fn line_type(line: &str) -> WaveFrontLineType {

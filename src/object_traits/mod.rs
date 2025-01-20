@@ -1,24 +1,23 @@
 use crate::utils::types_util::{QuatF32, Vec3};
 
 pub trait SceneObject {
-
-    fn translate(&mut self, trans : Vec3);
-    fn set_position(&mut self, pos : Vec3);
-    fn get_position(&self)->Vec3;
+    fn translate(&mut self, trans: Vec3);
+    fn set_position(&mut self, pos: Vec3);
+    fn get_position(&self) -> Vec3;
     fn apply_position(&mut self);
 
-    fn scale(&mut self, scale : Vec3);
-    fn set_scale(&mut self, scale : Vec3);
-    fn get_scale(&self)->Vec3;
+    fn scale(&mut self, scale: Vec3);
+    fn set_scale(&mut self, scale: Vec3);
+    fn get_scale(&self) -> Vec3;
     fn apply_scale(&mut self);
-    
-    fn rotate(&mut self, rotation : QuatF32);
-    fn set_rotation(&mut self, rotation : QuatF32);
-    fn get_rotation(&self)->QuatF32;
+
+    fn rotate(&mut self, rotation: QuatF32);
+    fn set_rotation(&mut self, rotation: QuatF32);
+    fn get_rotation(&self) -> QuatF32;
     fn apply_rotation(&mut self);
 
     #[inline]
-    fn apply_all_transforms(&mut self){
+    fn apply_all_transforms(&mut self) {
         self.apply_position();
         self.apply_scale();
         self.apply_rotation();

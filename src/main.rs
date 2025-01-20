@@ -1,6 +1,6 @@
 mod test;
 
-fn main(){
+fn main() {
     println!("starting tests");
     let now = std::time::Instant::now();
 

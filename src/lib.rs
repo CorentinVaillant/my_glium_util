@@ -1,7 +1,7 @@
 //Just a lib to use glim
 
-pub mod camera;
 pub mod app;
+pub mod camera;
 pub mod mesh;
-pub mod utils;
 pub mod object_traits;
+pub mod utils;

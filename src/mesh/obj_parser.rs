@@ -5,22 +5,17 @@ use std::{fs::read_to_string, path::Path};
 use crate::mesh::vertex::Vertex;
 
 use super::mesh::Mesh;
+use crate::utils::macro_util::debug_println;
 
 
 pub trait WaveFrontParsable {
     fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> where Self: Sized;
 }
-
 #[derive(Debug)]
 pub enum WavefrontError {
     CouldNotReadFile,
     InvalidFaceData,
 }
-
-
-use crate::utils::macro_util::debug_println;
-
-
 
 
 struct FaceDataTripelet{
@@ -57,7 +52,6 @@ impl WaveFrontParsable for Mesh {
                 WaveFrontLineType::Face                 => faces_data.push(parse_face(line)?),
                 
                 WaveFrontLineType::Name                 =>name = Some(line[2..].to_string()),
-                WaveFrontLineType::GroupeName           =>(),
 
                 WaveFrontLineType::Comment              => debug_println!("Fond comment :{}",line),
                 WaveFrontLineType::Empty                => (),
@@ -66,8 +60,7 @@ impl WaveFrontParsable for Mesh {
             }
         }
 
-
-        let vertecies = geo_vert_data.into_iter().enumerate().map(|(i,pos)|{
+        let vertecies:Vec<Vertex> = geo_vert_data.into_iter().enumerate().map(|(i,pos)|{
             Vertex { 
                 position: pos,
                 normal: *normal_vert_data.get(i).unwrap_or(&[0.;3]),
@@ -76,29 +69,29 @@ impl WaveFrontParsable for Mesh {
 
         }).collect();
 
-        let mut indices = Vec::new();
-
+        let mut indices = vec![];
         for face in faces_data{
-            let face_indices:Vec<u32> = face.into_iter().map(|triplet| triplet.geo_vert_index).collect();
-            indices.extend(triangulate_face(&face_indices));
+            for tripelet in face{
+                indices.push(tripelet.geo_vert_index - 1);
+            }
         }
 
         let mut result = Mesh::from_verts_and_indices(vertecies, indices);
-        result.name = name;
 
+        result.name = name;
         Ok(result)
     }
 }
 
 
 
-fn triangulate_face(indices :&[u32])->Vec<[u32;3]>{
-    let mut triangle = Vec::new();
-    for i in 1..(indices.len() -1){
-        triangle.push([indices[0],indices[i],indices[i+1]]);
-    }
-    triangle
-}
+// fn triangulate_face(indices :&[u32])->Vec<[u32;3]>{
+//     let mut triangle = Vec::new();
+//     for i in 1..(indices.len() -1){
+//         triangle.push([indices[0],indices[i],indices[i+1]]);
+//     }
+//     triangle
+// }
 
 
 fn line_type(line: &str) -> WaveFrontLineType {

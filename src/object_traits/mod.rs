@@ -26,8 +26,14 @@ pub trait SceneObject {
 
 
 
-pub trait Drawable {
-    type DrawError;
+pub trait Renderable {
+    type RenderError;
 
-    fn draw(&self)->Result<(),Self::DrawError>;
+    fn render<F:glium::backend::Facade>(
+        &self,facade :&F, 
+        program:&glium::Program, 
+        target :&mut glium::Frame, 
+        uniform:&glium::uniforms::UniformsStorage<impl glium::uniforms::AsUniformValue, impl glium::uniforms::Uniforms>,
+        draw_parameters: &glium::DrawParameters,
+    )->Result<(),Self::RenderError>;
 }

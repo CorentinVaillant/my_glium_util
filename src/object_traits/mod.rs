@@ -1,4 +1,8 @@
-use crate::utils::types_util::{QuatF32, Vec3};
+
+mod rotation;
+pub use rotation::Rotation;
+
+use crate::utils::types_util::Vec3;
 pub trait SceneObject {
     fn translate(&mut self, trans: Vec3);
     fn set_position(&mut self, pos: Vec3);
@@ -10,9 +14,9 @@ pub trait SceneObject {
     fn get_scale(&self) -> Vec3;
     fn apply_scale(&mut self);
 
-    fn rotate(&mut self, rotation: QuatF32);
-    fn set_rotation(&mut self, rotation: QuatF32);
-    fn get_rotation(&self) -> QuatF32;
+    fn rotate(&mut self, rotation: Rotation);
+    fn set_rotation(&mut self, rotation: Rotation);
+    fn get_rotation(&self) -> Rotation;
     fn apply_rotation(&mut self);
 
     #[inline]
@@ -21,10 +25,6 @@ pub trait SceneObject {
         self.apply_scale();
         self.apply_rotation();
     }
-
-    // fn rotate_z(&mut self, angle : f32){
-
-    // }
 }
 
 

@@ -1,8 +1,8 @@
 use glium::Surface;
 use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
-use crate::object_traits::{Renderable, SceneObject};
-use crate::utils::types_util::{QuatF32, Vec3};
+use crate::object_traits::{Renderable, Rotation, SceneObject};
+use crate::utils::types_util::Vec3;
 
 use super::vertex::Vertex;
 
@@ -16,7 +16,7 @@ pub struct Mesh {
 
     pub(crate) position: Vec3,
     pub(crate) scale: Vec3,
-    pub(crate) rotation: QuatF32,
+    pub(crate) rotation: Rotation,
 }
 
 impl SceneObject for Mesh {
@@ -67,25 +67,25 @@ impl SceneObject for Mesh {
     }
 
     #[inline]
-    fn rotate(&mut self, rotation: QuatF32) {
-        self.rotation = rotation * self.rotation;
+    fn rotate(&mut self, rotation: Rotation) {
+        self.rotation +=rotation;
     }
 
     #[inline]
-    fn set_rotation(&mut self, rotation: QuatF32) {
+    fn set_rotation(&mut self, rotation: Rotation) {
         self.rotation = rotation;
     }
 
     #[inline]
-    fn get_rotation(&self) -> QuatF32 {
+    fn get_rotation(&self) -> Rotation {
         self.rotation
     }
 
     fn apply_rotation(&mut self) {
         for vert in self.vertecies.iter_mut() {
-            vert.rotate(self.rotation);
+            vert.rotate(self.rotation.into());
         }
-        self.rotation = QuatF32::one();
+        self.rotation = Rotation::zero();
     }
 }
 
@@ -100,7 +100,7 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
 
             position: Vec3::v_space_zero(),
             scale: [1., 1., 1.].into(),
-            rotation: QuatF32::one(),
+            rotation: Rotation::zero(),
         }
     }
 }
@@ -111,7 +111,7 @@ impl Mesh {
     }
 
     pub fn from_verts_and_indices(vertecies : Vec<Vertex>, indices : Vec<u32>)->Self{
-        Self { name:None,vertecies, indices: Some(indices) ,_texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::one() }
+        Self { name:None,vertecies, indices: Some(indices) ,_texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: Rotation::zero() }
     }
 }
 
@@ -123,7 +123,7 @@ impl Mesh {
     pub fn to_vertex_buffer<F : glium::backend::Facade>(&self,facade :&F)->Result<glium::vertex::VertexBuffer<Vertex>,glium::vertex::BufferCreationError>{
         
         let vertecies: Vec<Vertex> = self.vertecies.iter().map(|vert|{
-            vert.get_transform(self.position, self.scale, self.rotation)
+            vert.get_transform(self.position, self.scale, self.rotation.into())
         }).collect();
         
         glium::vertex::VertexBuffer::new(facade, &vertecies)

@@ -63,6 +63,7 @@ impl SceneObject for Mesh {
         for vert in self.vertecies.iter_mut() {
             vert.scale(self.scale);
         }
+        self.scale = [1.;3].into();
     }
 
     #[inline]
@@ -84,6 +85,7 @@ impl SceneObject for Mesh {
         for vert in self.vertecies.iter_mut() {
             vert.rotate(self.rotation);
         }
+        self.rotation = QuatF32::one();
     }
 }
 

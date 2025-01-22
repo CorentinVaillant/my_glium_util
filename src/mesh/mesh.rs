@@ -100,7 +100,7 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
 
             position: Vec3::v_space_zero(),
             scale: [1., 1., 1.].into(),
-            rotation: QuatF32::zero(),
+            rotation: QuatF32::one(),
         }
     }
 }
@@ -111,7 +111,7 @@ impl Mesh {
     }
 
     pub fn from_verts_and_indices(vertecies : Vec<Vertex>, indices : Vec<u32>)->Self{
-        Self { name:None,vertecies, indices: Some(indices) ,_texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::zero() }
+        Self { name:None,vertecies, indices: Some(indices) ,_texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::one() }
     }
 }
 

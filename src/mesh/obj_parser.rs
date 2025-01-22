@@ -53,17 +53,16 @@ impl WaveFrontParsable for Mesh {
                 WaveFrontLineType::GeoVertex            => geo_vert_data.push(parse_tree_float(line,0.,)),
                 WaveFrontLineType::TextureVertex        => texture_vert_data.push(parse_tree_float(line,0.)),
                 WaveFrontLineType::VertexNormal         => normal_vert_data.push(parse_tree_float(line,0.)),
-                WaveFrontLineType::ParameterSpaceVert   => debug_println!("Point not implemented yet"),//replace with : => _parameter_space_vertex.push(parse_tree_float(line,1.)),
-                WaveFrontLineType::Point                => debug_println!("Point not implemented yet"),
-                WaveFrontLineType::Line                 => debug_println!("Line not implemented yet"),
-                WaveFrontLineType::Face                 => faces_data.push(parse_face(line)?),
 
-                WaveFrontLineType::Groupe               =>(),
+                WaveFrontLineType::Face                 => faces_data.push(parse_face(line)?),
+                
                 WaveFrontLineType::Name                 =>name = Some(line[2..].to_string()),
+                WaveFrontLineType::GroupeName           =>(),
 
                 WaveFrontLineType::Comment              => debug_println!("Fond comment :{}",line),
-                WaveFrontLineType::Empty                => (),    
+                WaveFrontLineType::Empty                => (),
                 WaveFrontLineType::Unknow               => debug_println!("Unknow or not yet implemented line :{}",line),
+                other                => debug_println!("{:#?} not implemented yet",other),
             }
         }
 
@@ -117,7 +116,9 @@ fn line_type(line: &str) -> WaveFrontLineType {
             "f " => WaveFrontLineType::Face,
 
             "o " =>WaveFrontLineType::Name,
-            "g " =>WaveFrontLineType::Groupe,
+            "g " =>WaveFrontLineType::GroupeName,
+            "s " =>WaveFrontLineType::SmothingGroup,
+            "mg" =>WaveFrontLineType::MergingGroupe,
             _ => match &line[0..1] {
                 "#" => WaveFrontLineType::Comment,
                 _    => WaveFrontLineType::Unknow
@@ -139,8 +140,13 @@ enum WaveFrontLineType {
     Line,  //l
     Face,  //f
 
-    Name,   //o
-    Groupe, //g
+    //grouping
+    Name,           //o
+    GroupeName,     //g
+    SmothingGroup,  //s
+    MergingGroupe,  //mg
+
+
 
     Comment,
     Empty,

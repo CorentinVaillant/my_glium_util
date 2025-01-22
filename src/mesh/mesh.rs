@@ -1,3 +1,4 @@
+use glium::vertex::MultiVerticesSource;
 use glium::Surface;
 use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
@@ -121,11 +122,8 @@ impl Mesh {
     }
 
     pub fn to_vertex_buffer<F : glium::backend::Facade>(&self,facade :&F)->Result<glium::vertex::VertexBuffer<Vertex>,glium::vertex::BufferCreationError>{
-        
-        let vertecies: Vec<Vertex> = self.vertecies.iter().map(|vert|{
-            vert.get_transform(self.position, self.scale, self.rotation)
-        }).collect();
-        glium::vertex::VertexBuffer::new(facade, &vertecies)
+        glium::vertex::VertexBuffer::new(facade, &self.vertecies)
+
     }
 
     pub fn to_index_buffer<F:glium::backend::Facade>(&self,facade :&F)->Result<glium::index::IndexBuffer<u32>, glium::index::BufferCreationError> {

@@ -48,13 +48,12 @@ impl Vertex {
     }
 
     pub fn get_transform(&self, trans: Vec3, scale: Vec3, rotation: QuatF32) -> Self{
-        return *self;
-        /*
+
         let mut transformed = self.get_translated(trans);
         transformed.scale(scale);
         transformed.rotate(rotation);
         transformed
-        */
+        
     }
 
     #[inline]

@@ -2,29 +2,45 @@
 
 use std::{fs::read_to_string, path::Path};
 
+use crate::mesh::vertex::Vertex;
+
+use super::mesh::Mesh;
+
+
+pub trait WaveFrontParsable {
+    fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> where Self: Sized;
+}
+
+#[derive(Debug)]
+pub enum WavefrontError {
+    CouldNotReadFile,
+    InvalidFaceData,
+}
+
 
 use crate::utils::macro_util::debug_println;
 
-use super::{mesh::Mesh, vertex::Vertex};
+
+
 
 struct FaceDataTripelet{
     geo_vert_index      : u32,
-    texture_vertex_index: Option<u32>,
-    vertex_normal_index : u32,
+    _texture_vertex_index: Option<u32>,
+    _vertex_normal_index : u32,
 }
 
 type FaceData = Vec<FaceDataTripelet>;
 
-impl Mesh {
+impl WaveFrontParsable for Mesh {
 
     /* Note 
     *   -> Obj index start with 1.
     */
-
-    pub fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> {
+    fn load_from_wavefront<P: AsRef<Path>>(path: P) -> Result<Self, WavefrontError> {
+        let mut name = None;
         let mut geo_vert_data = vec![];
         let mut texture_vert_data = vec![];
-        let mut vertex_normal_data = vec![];
+        let mut normal_vert_data = vec![];
         //let mut _parameter_space_vertex = vec![];
         let mut faces_data = vec![];
         
@@ -36,26 +52,30 @@ impl Mesh {
             match line_type(line) {
                 WaveFrontLineType::GeoVertex            => geo_vert_data.push(parse_tree_float(line,0.,)),
                 WaveFrontLineType::TextureVertex        => texture_vert_data.push(parse_tree_float(line,0.)),
-                WaveFrontLineType::VertexNormal         => vertex_normal_data.push(parse_tree_float(line,0.)),
+                WaveFrontLineType::VertexNormal         => normal_vert_data.push(parse_tree_float(line,0.)),
                 WaveFrontLineType::ParameterSpaceVert   => debug_println!("Point not implemented yet"),//replace with : => _parameter_space_vertex.push(parse_tree_float(line,1.)),
                 WaveFrontLineType::Point                => debug_println!("Point not implemented yet"),
                 WaveFrontLineType::Line                 => debug_println!("Line not implemented yet"),
                 WaveFrontLineType::Face                 => faces_data.push(parse_face(line)?),
+
+                WaveFrontLineType::Groupe               =>(),
+                WaveFrontLineType::Name                 =>name = Some(line[2..].to_string()),
+
                 WaveFrontLineType::Comment              => debug_println!("Fond comment :{}",line),
                 WaveFrontLineType::Empty                => (),    
                 WaveFrontLineType::Unknow               => debug_println!("Unknow or not yet implemented line :{}",line),
             }
         }
 
-        let mut vertecies = Vec::with_capacity(geo_vert_data.len());
 
-        for ((position,texture),normal) in geo_vert_data.into_iter().zip(texture_vert_data).into_iter().zip(vertex_normal_data){
-            vertecies.push(Vertex{
-                position,
-                normal,
-                texture
-            });
-        }
+        let vertecies = geo_vert_data.into_iter().enumerate().map(|(i,pos)|{
+            Vertex { 
+                position: pos,
+                normal: *normal_vert_data.get(i).unwrap_or(&[0.;3]),
+                texture: *texture_vert_data.get(i).unwrap_or(&[0.;3]),
+            }
+
+        }).collect();
 
         let mut indices = Vec::new();
 
@@ -64,16 +84,14 @@ impl Mesh {
             indices.extend(triangulate_face(&face_indices));
         }
 
+        let mut result = Mesh::from_verts_and_indices(vertecies, indices);
+        result.name = name;
 
-        Ok(Mesh::from_verts_and_indices(vertecies, indices))
+        Ok(result)
     }
 }
 
-#[derive(Debug)]
-pub enum WavefrontError {
-    CouldNotReadFile,
-    InvalidFaceData,
-}
+
 
 fn triangulate_face(indices :&[u32])->Vec<[u32;3]>{
     let mut triangle = Vec::new();
@@ -85,30 +103,30 @@ fn triangulate_face(indices :&[u32])->Vec<[u32;3]>{
 
 
 fn line_type(line: &str) -> WaveFrontLineType {
-    let mut split = line.split(" ");
-    match split.next() {
-        None => WaveFrontLineType::Empty,
-        Some(s) => {
-            let mut chars = s.chars();
-            match chars.next() {
-                Some('v') => match chars.next() {
-                    Some('t') => WaveFrontLineType::TextureVertex,
-                    Some('n') => WaveFrontLineType::VertexNormal,
-                    Some('p') => WaveFrontLineType::ParameterSpaceVert,
-                    Some(_) => WaveFrontLineType::GeoVertex,
-                    None => WaveFrontLineType::Unknow,
-                },
-                Some('p') => WaveFrontLineType::Point,
-                Some('l') => WaveFrontLineType::Line,
-                Some('f') => WaveFrontLineType::Face,
-                Some('#') => WaveFrontLineType::Comment,
+    if line.len() < 2{
+        WaveFrontLineType::Empty
+    }else {
+        match &line[0..2] {
+            "v " => WaveFrontLineType::GeoVertex,
+            "vt" => WaveFrontLineType::TextureVertex,
+            "vn" => WaveFrontLineType::VertexNormal,
+            "vp" => WaveFrontLineType::ParameterSpaceVert,
 
-                _ => WaveFrontLineType::Unknow,
+            "p " => WaveFrontLineType::Point,
+            "l " => WaveFrontLineType::Line,
+            "f " => WaveFrontLineType::Face,
+
+            "o " =>WaveFrontLineType::Name,
+            "g " =>WaveFrontLineType::Groupe,
+            _ => match &line[0..1] {
+                "#" => WaveFrontLineType::Comment,
+                _    => WaveFrontLineType::Unknow
             }
-        }
+        }   
     }
 }
 
+#[derive(Debug)]
 enum WaveFrontLineType {
     //Vertex data
     GeoVertex,          //v
@@ -120,6 +138,9 @@ enum WaveFrontLineType {
     Point, //p
     Line,  //l
     Face,  //f
+
+    Name,   //o
+    Groupe, //g
 
     Comment,
     Empty,
@@ -188,8 +209,8 @@ fn parse_face(line:&str)->Result<FaceData,WavefrontError>{
 
         face_data.push(FaceDataTripelet {
             geo_vert_index,
-            texture_vertex_index,
-            vertex_normal_index,
+            _texture_vertex_index: texture_vertex_index,
+            _vertex_normal_index: vertex_normal_index,
         });
     }
 

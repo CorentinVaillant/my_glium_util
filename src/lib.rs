@@ -5,3 +5,5 @@ pub mod camera;
 pub mod mesh;
 pub mod object_traits;
 pub mod utils;
+
+mod test;

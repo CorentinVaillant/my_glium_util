@@ -12,6 +12,12 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, position, normal, texture);
 
+impl From<[f32;3]> for Vertex {
+    fn from(value: [f32;3]) -> Self {
+        Vertex { position: value, normal: [0.;3], texture: [0.;3] }
+    }
+}
+
 impl Vertex {
     pub fn get_translated(&self, trans: Vec3) -> Self {
         Self {

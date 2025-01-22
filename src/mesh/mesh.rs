@@ -7,6 +7,8 @@ use super::vertex::Vertex;
 
 #[derive(Debug)]
 pub struct Mesh {
+    pub(crate) name : Option<String>,
+
     pub(crate) vertecies: Vec<Vertex>,
     pub(crate) indices : Option<Vec<[u32; 3]>>, 
     pub(crate) texture : Option<glium::texture::Texture2d>, //? idk
@@ -88,6 +90,7 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
     fn from(value: A) -> Self {
         let vertecies = value.into();
         Self {
+            name : None,
             vertecies,
             indices :None,
             texture :None,
@@ -105,6 +108,12 @@ impl Mesh {
     }
 
     pub fn from_verts_and_indices(vertecies : Vec<Vertex>, indices : Vec<[u32; 3]>)->Self{
-        Self { vertecies, indices: Some(indices) ,texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::zero() }
+        Self { name:None,vertecies, indices: Some(indices) ,texture: None, position: Vec3::v_space_zero(), scale: [1.;3].into(), rotation: QuatF32::zero() }
+    }
+}
+
+impl Mesh {
+    pub fn vertecies_number(&self)->usize{
+        self.vertecies.len()
     }
 }

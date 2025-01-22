@@ -119,7 +119,11 @@ impl Mesh {
     }
 
     pub fn to_vertex_buffer<F : glium::backend::Facade>(&self,facade :&F)->Result<glium::vertex::VertexBuffer<Vertex>,glium::vertex::BufferCreationError>{
-        glium::vertex::VertexBuffer::new(facade, &self.vertecies)
+        
+        let vertecies: Vec<Vertex> = self.vertecies.iter().map(|vert|{
+            vert.get_transform(self.position, self.scale, self.rotation)
+        }).collect();
+        glium::vertex::VertexBuffer::new(facade, &vertecies)
     }
 
     pub fn to_index_buffer<F:glium::backend::Facade>(&self,facade :&F)->Result<glium::index::IndexBuffer<u32>, glium::index::BufferCreationError> {

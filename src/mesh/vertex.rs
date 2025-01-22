@@ -47,6 +47,13 @@ impl Vertex {
         }
     }
 
+    pub fn get_transform(&self, trans: Vec3, scale: Vec3, rotation: QuatF32) -> Self{
+        let mut transformed = self.get_translated(trans);
+        transformed.scale(scale);
+        transformed.rotate(rotation);
+        transformed
+    }
+
     #[inline]
     pub fn translate(&mut self, trans: Vec3) {
         self.position = (self.position.into_vec_math() + trans).into();

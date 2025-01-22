@@ -21,6 +21,10 @@ pub trait SceneObject {
         self.apply_scale();
         self.apply_rotation();
     }
+
+    // fn rotate_z(&mut self, angle : f32){
+
+    // }
 }
 
 

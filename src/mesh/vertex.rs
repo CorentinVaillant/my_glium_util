@@ -52,7 +52,7 @@ impl Vertex {
         let mut transformed = self.get_translated(trans);
         transformed.scale(scale);
         transformed.rotate(rotation);
-        println!("{:#?}",transformed);
+        
         transformed
         
     }

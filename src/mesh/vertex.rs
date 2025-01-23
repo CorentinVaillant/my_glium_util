@@ -12,9 +12,13 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, position, normal, texture);
 
-impl From<[f32;3]> for Vertex {
-    fn from(value: [f32;3]) -> Self {
-        Vertex { position: value, normal: [0.;3], texture: [0.;3] }
+impl From<[f32; 3]> for Vertex {
+    fn from(value: [f32; 3]) -> Self {
+        Vertex {
+            position: value,
+            normal: [0.; 3],
+            texture: [0.; 3],
+        }
     }
 }
 
@@ -47,14 +51,12 @@ impl Vertex {
         }
     }
 
-    pub fn get_transform(&self, trans: Vec3, scale: Vec3, rotation: QuatF32) -> Self{
-
+    pub fn get_transform(&self, trans: Vec3, scale: Vec3, rotation: QuatF32) -> Self {
         let mut transformed = self.get_translated(trans);
         transformed.scale(scale);
         transformed.rotate(rotation);
-        
+
         transformed
-        
     }
 
     #[inline]
@@ -71,8 +73,8 @@ impl Vertex {
 
     #[inline]
     pub fn rotate(&mut self, rotation: QuatF32) {
-        let (_,vec):(f64,Vec3) = rotation.into();
-        let rotation:QuatF32 = (1.,vec).into();
+        let (_, vec): (f64, Vec3) = rotation.into();
+        let rotation: QuatF32 = (1., vec).into();
         (_, self.position) = <QuatF32 as Into<(f32, [f32; 3])>>::into(
             rotation
                 * <(f32, [f32; 3]) as Into<QuatF32>>::into((0., self.position))

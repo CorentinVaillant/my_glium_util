@@ -1,45 +1,43 @@
-pub struct Camera {
-    pub position: [f32; 3],
-    pub right_vector: [f32; 3],
-    pub up_vector: [f32; 3],
-    pub direction_vector: [f32; 3],
+use crate::utils::types_util::Mat4;
+
+pub trait Camera {
+    fn projection_matrix(&self) -> Mat4;
 }
 
-impl Into<[[f32; 4]; 4]> for Camera {
-    fn into(self) -> [[f32; 4]; 4] {
-        let r = self.right_vector;
-        let u = self.up_vector;
-        let d = self.direction_vector;
-        let p = self.position;
-        let m1 = [
-            [r[0], r[1], r[2], 0.],
-            [u[0], u[1], u[2], 0.],
-            [d[0], d[1], d[2], 0.],
-            [0., 0., 0., 1.],
-        ];
-        let m2 = [
-            [1., 0., 0., -p[0]],
-            [0., 1., 0., -p[1]],
-            [0., 0., 1., -p[2]],
-            [0., 0., 0., 1.],
-        ];
+pub struct OrthographicCam {
+    right: f32,
+    top: f32,
+    far: f32,
 
-        return mat4_mutl(m1, m2);
-    }
+    left: f32,
+    bottom: f32,
+    near: f32,
 }
 
-fn mat4_mutl(m1: [[f32; 4]; 4], m2: [[f32; 4]; 4]) -> [[f32; 4]; 4] {
-    //naive algorithm
-    let mut result = [[0.; 4]; 4];
-    for i in 0..4 {
-        for j in 0..4 {
-            for k in 0..4 {
-                result[i][j] = result[i][j] + m1[i][k] * m2[k][j];
-            }
+impl OrthographicCam {
+    pub fn new(right: f32, top: f32, far: f32, left: f32, bottom: f32, near: f32) -> Self {
+        Self {
+            right,
+            top,
+            far,
+            left,
+            bottom,
+            near,
         }
     }
-    result
 }
 
-//TODO
-//? https://learnopengl.com/Getting-started/Camera
+impl Camera for OrthographicCam{
+    fn projection_matrix(&self) -> Mat4 {
+        
+        let c = ((self.near+self.left)/2.,(self.bottom+self.top)/2.,self.near);
+        let s = (2./(self.right-self.left),2./(self.top-self.bottom),-2./(self.far-self.near));
+
+        [
+            [s.0, 0.0, 0.0,-c.0],
+            [0.0, s.1, 0.0,-c.1],
+            [0.0, 0.0, s.2,-c.2],
+            [0.0, 0.0, 0.0, 1.0]
+        ].into()
+    }
+}

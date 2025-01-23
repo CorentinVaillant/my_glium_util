@@ -1,4 +1,3 @@
-
 mod rotation;
 pub use rotation::Rotation;
 
@@ -27,17 +26,18 @@ pub trait SceneObject {
     }
 }
 
-
-
-
 pub trait Renderable {
     type RenderError;
 
-    fn render<F:glium::backend::Facade>(
-        &self,facade :&F, 
-        program:&glium::Program, 
-        target :&mut glium::Frame, 
-        uniform:&glium::uniforms::UniformsStorage<impl glium::uniforms::AsUniformValue, impl glium::uniforms::Uniforms>,
+    fn render<F: glium::backend::Facade>(
+        &self,
+        facade: &F,
+        program: &glium::Program,
+        target: &mut glium::Frame,
+        uniform: &glium::uniforms::UniformsStorage<
+            impl glium::uniforms::AsUniformValue,
+            impl glium::uniforms::Uniforms,
+        >,
         draw_parameters: &glium::DrawParameters,
-    )->Result<(),Self::RenderError>;
+    ) -> Result<(), Self::RenderError>;
 }

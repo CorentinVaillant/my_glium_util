@@ -1,3 +1,7 @@
+use core::ops::{Add, AddAssign, Mul};
+use std::ops::MulAssign;
+
+
 use crate::utils::types_util::QuatF32;
 
 #[derive(Debug, Clone, Copy)]
@@ -19,7 +23,7 @@ impl From<Rotation> for QuatF32 {
     }
 }
 
-impl core::ops::Add for Rotation {
+impl Add for Rotation {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -29,9 +33,23 @@ impl core::ops::Add for Rotation {
     }
 }
 
-impl core::ops::AddAssign for Rotation {
+impl AddAssign for Rotation {
     fn add_assign(&mut self, rhs: Self) {
         *self = *self + rhs
+    }
+}
+
+impl Mul<f32> for Rotation{
+    type Output=Self;
+
+    fn mul(self, rhs: f32) -> Self::Output {
+        self.value.powf(rhs).into()
+    }
+}
+
+impl MulAssign<f32> for Rotation{
+    fn mul_assign(&mut self, rhs: f32) {
+        *self = *self * rhs
     }
 }
 

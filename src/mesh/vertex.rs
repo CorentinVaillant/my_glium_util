@@ -73,12 +73,14 @@ impl Vertex {
 
     #[inline]
     pub fn rotate(&mut self, rotation: QuatF32) {
-        let (_, vec): (f64, Vec3) = rotation.into();
-        let rotation: QuatF32 = (1., vec).into();
-        (_, self.position) = <QuatF32 as Into<(f32, [f32; 3])>>::into(
-            rotation
-                * <(f32, [f32; 3]) as Into<QuatF32>>::into((0., self.position))
-                * rotation.f_mult_inverse(),
-        );
+        *self = self.get_rotated(rotation);
+
+        // let (_, vec): (f64, Vec3) = rotation.into();
+        // let rotation: QuatF32 = (1., vec).into();
+        // (_, self.position) = <QuatF32 as Into<(f32, [f32; 3])>>::into(
+        //     rotation
+        //         * <(f32, [f32; 3]) as Into<QuatF32>>::into((0., self.position))
+        //         * rotation.f_mult_inverse(),
+        // );
     }
 }

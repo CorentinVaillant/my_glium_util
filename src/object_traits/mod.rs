@@ -1,6 +1,7 @@
 mod rotation;
 pub use rotation::Rotation;
 mod scale;
+mod translation;
 
 use crate::utils::types_util::Vec3;
 pub trait SceneObject {

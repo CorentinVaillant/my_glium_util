@@ -27,9 +27,9 @@ impl Add for Rotation {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        let a: QuatF32 = rhs.into();
-        let b: QuatF32 = self.into();
-        (b*a).into()
+        let rhs_q: QuatF32 = rhs.into();
+        let self_q: QuatF32 = self.into();
+        (rhs_q * self_q).into()
     }
 }
 

@@ -1,5 +1,7 @@
 use core::ops::{Add, AddAssign, Mul, MulAssign};
 
+use my_rust_matrix_lib::my_matrix_lib::prelude::{Field, Ring};
+
 use crate::utils::types_util::QuatF32;
 
 #[derive(Debug, Clone, Copy)]
@@ -47,6 +49,26 @@ impl Mul<f32> for Rotation{
 
 impl MulAssign<f32> for Rotation{
     fn mul_assign(&mut self, rhs: f32) {
+        *self = *self * rhs
+    }
+}
+
+impl Mul<i32> for Rotation{
+    type Output=Self;
+
+    fn mul(self, rhs: i32) -> Self::Output {
+        if rhs.is_positive(){
+            let rhs:u16 = rhs.try_into().unwrap();
+            self.value.r_powu(rhs).into()
+        }else{
+            let rhs:u16 = (-rhs).try_into().unwrap();
+            self.value.r_powu(rhs).f_mult_inverse().into()
+        }
+    }
+}
+
+impl MulAssign<i32> for Rotation{
+    fn mul_assign(&mut self, rhs: i32) {
         *self = *self * rhs
     }
 }

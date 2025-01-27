@@ -41,4 +41,14 @@ mod test {
         let rotation = Rotation::from_axis(3.1415, (0., 1., 0.));
         chrono!(Mesh::rotate, &mut sphere, rotation);
     }
+
+    #[test]
+    pub(super) fn transformation_test(){
+        println!("->\ttest transformation");
+
+        let axis = (core::f32::consts::FRAC_PI_2,(1.,0.,0.));
+        let rotation = Rotation::from_axis(axis.0, axis.1);
+        assert_eq!(axis,rotation.to_axis());
+
+    }
 }

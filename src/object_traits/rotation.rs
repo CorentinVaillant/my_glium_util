@@ -1,6 +1,6 @@
 use core::ops::{Add, AddAssign, Mul, MulAssign};
 
-use my_rust_matrix_lib::my_matrix_lib::prelude::{Field, Ring};
+use my_rust_matrix_lib::my_matrix_lib::prelude::{EuclidianSpace, Field, Ring};
 
 use crate::utils::types_util::QuatF32;
 
@@ -82,17 +82,33 @@ impl Rotation {
 impl Rotation {
     pub fn from_axis(angle: f32, axis: (f32, f32, f32)) -> Self {
         let (b_x, b_y, b_z) = axis;
-        let a_div2 = angle / 2.;
+        let axis_length = (b_x * b_x + b_y * b_y + b_z * b_z).sqrt();
+        let normalized_axis = (b_x / axis_length, b_y / axis_length, b_z / axis_length);
+    
+        let a_div2 = angle / 2.0;
         let sin_a_div2 = f32::sin(a_div2);
-
+    
         let q: QuatF32 = (
             f32::cos(a_div2),
-            sin_a_div2 * f32::cos(b_x),
-            sin_a_div2 * f32::cos(b_y),
-            sin_a_div2 * f32::cos(b_z),
+            sin_a_div2 * normalized_axis.0,
+            sin_a_div2 * normalized_axis.1,
+            sin_a_div2 * normalized_axis.2,
         )
             .into();
+    
+        Self { value: q }
+    }
 
-        q.into()
+    pub fn to_axis(self)->(f32,(f32,f32,f32)){
+        
+        let im_lenght = self.value.im.length();
+        if im_lenght == 0.{
+            return (0.,(0.,0.,0.));
+        }
+        
+        let angle = 2. * f32::atan2(im_lenght, self.value.re);
+        let axis = self.value.im / im_lenght;
+        
+        (angle,(axis[0],axis[1],axis[2]))
     }
 }

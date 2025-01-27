@@ -1,6 +1,4 @@
-use core::ops::{Add, AddAssign, Mul};
-use std::ops::MulAssign;
-
+use core::ops::{Add, AddAssign, Mul, MulAssign};
 
 use crate::utils::types_util::QuatF32;
 

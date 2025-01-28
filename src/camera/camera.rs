@@ -1,5 +1,5 @@
 
-use crate::{object_traits::{Rotation,Scale,Translation, SceneObject}, utils::types_util::{Mat4, Vec3}};
+use crate::{object_traits::{Rotation,Scale,Translation, SceneObject}, utils::types_util::Mat4};
 
 pub trait Camera {
     fn projection_matrix(&self) -> Mat4;

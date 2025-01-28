@@ -2,7 +2,7 @@ use core::ops::{Add, AddAssign, Mul, MulAssign};
 
 use my_rust_matrix_lib::my_matrix_lib::prelude::{EuclidianSpace, Field, Ring};
 
-use crate::utils::types_util::{Mat4, QuatF32};
+use crate::utils::types_util::{Mat3, Mat4, QuatF32};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Rotation {

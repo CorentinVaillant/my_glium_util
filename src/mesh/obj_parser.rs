@@ -153,12 +153,9 @@ fn parse_tree_float(line: &str, default: f32) -> [f32; 3] {
         if indice > 3 {
             return result;
         }
-        match split.parse() {
-            Ok(val) => {
-                result[indice] = val;
-                indice += 1;
-            }
-            _ => (),
+        if let Ok(val) = split.parse() {
+            result[indice] = val;
+            indice += 1;
         };
     }
 
@@ -172,12 +169,9 @@ fn parse_four_float(line: &str, default: f32) -> [f32; 4] {
         if indice > 4 {
             return result;
         }
-        match split.parse() {
-            Ok(val) => {
-                result[indice] = val;
-                indice += 1;
-            }
-            _ => (),
+        if let Ok(val) = split.parse() {
+            result[indice] = val;
+            indice += 1;
         };
     }
 
@@ -197,7 +191,7 @@ fn parse_face(line: &str) -> Result<FaceData, WavefrontError> {
     let split: Vec<&str> = line.split(' ').collect();
 
     //split(0) == 'f'
-    if split.get(0).is_none_or(|c| *c != "f") {
+    if split.first().is_none_or(|c| *c != "f") {
         debug_println!("face line \"{}\" is invalide", line);
         return Err(WavefrontError::InvalidFaceData);
     }

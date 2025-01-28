@@ -5,9 +5,7 @@ use glium::{
 };
 
 pub trait ApplicationContext {
-    fn draw_frame(&mut self, _display: &Display<WindowSurface>) {
-        ()
-    }
+    fn draw_frame(&mut self, _display: &Display<WindowSurface>) {}
     fn new(display: &Display<WindowSurface>) -> Self;
     fn update(&mut self) {}
     fn handle_window_event(
@@ -76,7 +74,7 @@ impl<T: ApplicationContext> State<T> {
 impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         println!("[app handeler] : resumed");
-        self.state = Some(State::new(event_loop, &self.app_name));
+        self.state = Some(State::new(event_loop, self.app_name));
     }
 
     fn window_event(

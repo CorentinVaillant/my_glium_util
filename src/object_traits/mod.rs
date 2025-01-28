@@ -1,3 +1,6 @@
+#![allow(clippy::suspicious_arithmetic_impl)]
+#![allow(clippy::suspicious_op_assign_impl)]
+
 mod rotation;
 pub use rotation::Rotation;
 pub use scale::Scale;

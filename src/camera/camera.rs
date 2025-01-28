@@ -7,6 +7,7 @@ pub trait Camera {
     fn projection_matrix(&self) -> Mat4;
 }
 
+#[derive(Debug,Clone, Copy)]
 pub struct OrthographicCam {
     right: f32,
     top: f32,

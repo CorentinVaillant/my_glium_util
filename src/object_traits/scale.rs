@@ -1,32 +1,33 @@
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 use crate::utils::types_util::{Arr3F32, Vec3};
 
+#[derive(Debug,Clone, Copy)]
 pub struct Scale{
-    value : Vec3
+    inner : Vec3
 }
 
 impl From<Vec3> for Scale {
     fn from(value: Vec3) -> Self {
-        Scale { value }
+        Scale { inner: value }
     }
 }
 
 impl From<Arr3F32> for Scale{
     fn from(value: Arr3F32) -> Self {
-        Scale{value:value.into()}
+        Scale{inner:value.into()}
     }
 }
 
 impl From<Scale> for Vec3{
     fn from(value: Scale) -> Self {
-        value.value
+        value.inner
     }
 }
 
 impl From<Scale> for Arr3F32 {
     fn from(value: Scale) -> Self {
-        value.value.into()
+        value.inner.into()
     }
 }
 
@@ -63,10 +64,37 @@ impl Scale {
 
     pub fn inverse(&self)->Self{
         [
-            1./self.value[0],
-            1./self.value[1],
-            1./self.value[2],
+            1./self.inner[0],
+            1./self.inner[1],
+            1./self.inner[2],
         ].into()
+    }
+
+    #[inline]
+    pub fn x(&self)->f32{
+        self.inner[0]
+    }
+
+    #[inline]
+    pub fn y(&self)->f32{
+        self.inner[1]
+    }
+
+    #[inline]
+    pub fn z(&self)->f32{
+        self.inner[2]
+    }
+}
+
+impl Index<char> for Scale{
+    type Output = f32;
+    fn index(&self, index: char) -> &Self::Output {
+        match index {
+            'x'=>&self.inner[0],
+            'y'=>&self.inner[1],
+            'z'=>&self.inner[2],
+             _ =>panic!("only use x y or z to index Scale")
+        }
     }
 }
 
@@ -93,7 +121,7 @@ impl Sub for Scale{
 impl AddAssign for Scale{
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..3{
-            self.value[i] *= rhs.value[i]
+            self.inner[i] *= rhs.inner[i]
         }
     }
 }
@@ -101,7 +129,7 @@ impl AddAssign for Scale{
 impl SubAssign for Scale {
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..3{
-            self.value[i] /= rhs.value[i]
+            self.inner[i] /= rhs.inner[i]
         }
     }
 }
@@ -110,12 +138,12 @@ impl Mul<f32> for Scale {
     type Output = Scale;
 
     fn mul(self, rhs: f32) -> Self::Output {
-        (self.value * rhs).into()
+        (self.inner * rhs).into()
     }
 }
 
 impl MulAssign<f32> for Scale{
     fn mul_assign(&mut self, rhs: f32) {
-        self.value *= rhs
+        self.inner *= rhs
     }
 }

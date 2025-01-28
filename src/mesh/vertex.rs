@@ -1,7 +1,7 @@
 use glium::implement_vertex;
 use my_rust_matrix_lib::my_matrix_lib::prelude::{Field, IntoVecMath};
 
-use crate::utils::types_util::{Arr3F32, QuatF32, Vec3};
+use crate::{object_traits::{Scale, Translation}, utils::types_util::{Arr3F32, QuatF32, Vec3}};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
@@ -23,17 +23,17 @@ impl From<[f32; 3]> for Vertex {
 }
 
 impl Vertex {
-    pub fn get_translated(&self, trans: Vec3) -> Self {
+    pub fn get_translated(&self, trans: Translation) -> Self {
         Self {
-            position: (self.position.into_vec_math() + trans).into(),
+            position: (self.position.into_vec_math() + trans.into()).into(),
             normal: self.normal,
             texture: self.texture,
         }
     }
 
-    pub fn get_scaled(&self, scale: Vec3) -> Self {
+    pub fn get_scaled(&self, scale: Scale) -> Self {
         let mut result = *self;
-        result.position.iter_mut().zip(scale).for_each(|(a, b)| {
+        result.position.iter_mut().zip(<Scale as Into<Vec3>>::into(scale)).for_each(|(a, b)| {
             *a = *a * b;
         });
 
@@ -51,7 +51,7 @@ impl Vertex {
         }
     }
 
-    pub fn get_transform(&self, trans: Vec3, scale: Vec3, rotation: QuatF32) -> Self {
+    pub fn get_transform(&self, trans: Translation, scale: Scale, rotation: QuatF32) -> Self {
         let mut transformed = self.get_translated(trans);
         transformed.scale(scale);
         transformed.rotate(rotation);
@@ -60,14 +60,14 @@ impl Vertex {
     }
 
     #[inline]
-    pub fn translate(&mut self, trans: Vec3) {
-        self.position = (self.position.into_vec_math() + trans).into();
+    pub fn translate(&mut self, trans: Translation) {
+        self.position = (self.position.into_vec_math() + trans.into()).into();
     }
 
     #[inline]
-    pub fn scale(&mut self, scale: Vec3) {
+    pub fn scale(&mut self, scale: Scale) {
         for i in 0..3 {
-            self.position[i] *= scale[i]
+            self.position[i] *= <Scale as Into<Vec3>>::into(scale)[i];
         }
     }
 

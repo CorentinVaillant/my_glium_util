@@ -1,6 +1,5 @@
-use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
-use crate::{object_traits::{Rotation, SceneObject}, utils::types_util::{Mat4, Vec3}};
+use crate::{object_traits::{Rotation,Scale,Translation, SceneObject}, utils::types_util::{Mat4, Vec3}};
 
 pub trait Camera {
     fn projection_matrix(&self) -> Mat4;
@@ -15,8 +14,8 @@ pub struct OrthographicCam {
     bottom: f32,
     near: f32,
 
-    position : Vec3,
-    scale    : Vec3,
+    position : Translation,
+    scale    : Scale,
     rotation : Rotation,
 }
 
@@ -30,8 +29,8 @@ impl OrthographicCam {
             bottom,
             near,
 
-            position : Vec3::v_space_zero(),
-            scale : [1.;3].into(),
+            position : Translation::zero(),
+            scale : Scale::zero(),
             rotation : Rotation::zero(),
         }
     }
@@ -53,22 +52,22 @@ impl Camera for OrthographicCam{
 }
 
 impl SceneObject for OrthographicCam{
-    fn translate(&mut self, trans: crate::utils::types_util::Vec3) {
+    fn translate(&mut self, trans: Translation) {
         self.position += trans;
     }
 
-    fn set_position(&mut self, pos: crate::utils::types_util::Vec3) {
+    fn set_position(&mut self, pos: Translation) {
         self.position = pos;
 
     }
 
-    fn get_position(&self) -> crate::utils::types_util::Vec3 {
+    fn get_position(&self) -> Translation {
         self.position
     }
 
     fn apply_position(&mut self) {
         let c = ((self.near+self.left)/2.,(self.bottom+self.top)/2.,self.near);
-        let [x,y,z] = self.position.into();
+        let [x,y,z]:[f32;3] = self.position.into();
 
         self.right = x + c.0;
         self.left = x - c.0;
@@ -80,32 +79,41 @@ impl SceneObject for OrthographicCam{
         self.bottom= z-c.0;
     }
 
-    fn scale(&mut self, scale: crate::utils::types_util::Vec3) {
-        todo!()
+    fn scale(&mut self, scale: Scale) {
+        self.scale += scale
     }
 
-    fn set_scale(&mut self, scale: crate::utils::types_util::Vec3) {
-        todo!()
+    fn set_scale(&mut self, scale: Scale) {
+        self.scale = scale
     }
 
-    fn get_scale(&self) -> crate::utils::types_util::Vec3 {
-        todo!()
+    fn get_scale(&self) -> Scale {
+        self.scale
     }
 
     fn apply_scale(&mut self) {
-        todo!()
+        self.right *= self.scale['x'];
+        self.left  *= self.scale['x'];
+
+        self.far *= self.scale['y'];
+        self.near*= self.scale['y'];
+
+        self.top    *= self.scale['z'];
+        self.bottom *= self.scale['z'];
+
+        self.scale = Scale::zero();
     }
 
     fn rotate(&mut self, rotation: crate::object_traits::Rotation) {
-        todo!()
+        self.rotation += rotation
     }
 
     fn set_rotation(&mut self, rotation: crate::object_traits::Rotation) {
-        todo!()
+        self.rotation = rotation;
     }
 
     fn get_rotation(&self) -> crate::object_traits::Rotation {
-        todo!()
+        self.rotation
     }
 
     fn apply_rotation(&mut self) {

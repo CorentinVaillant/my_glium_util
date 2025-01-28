@@ -1,18 +1,19 @@
 mod rotation;
 pub use rotation::Rotation;
+pub use scale::Scale;
+pub use translation::Translation;
 mod scale;
 mod translation;
 
-use crate::utils::types_util::Vec3;
 pub trait SceneObject {
-    fn translate(&mut self, trans: Vec3);
-    fn set_position(&mut self, pos: Vec3);
-    fn get_position(&self) -> Vec3;
+    fn translate(&mut self, trans: Translation);
+    fn set_position(&mut self, pos: Translation);
+    fn get_position(&self) -> Translation;
     fn apply_position(&mut self);
 
-    fn scale(&mut self, scale: Vec3);
-    fn set_scale(&mut self, scale: Vec3);
-    fn get_scale(&self) -> Vec3;
+    fn scale(&mut self, scale: Scale);
+    fn set_scale(&mut self, scale: Scale);
+    fn get_scale(&self) -> Scale;
     fn apply_scale(&mut self);
 
     fn rotate(&mut self, rotation: Rotation);

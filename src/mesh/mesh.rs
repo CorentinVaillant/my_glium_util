@@ -1,8 +1,6 @@
 use glium::Surface;
-use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
-use crate::object_traits::{Renderable, Rotation, SceneObject};
-use crate::utils::types_util::Vec3;
+use crate::object_traits::{Renderable, Rotation, Scale, SceneObject, Translation};
 
 use super::vertex::Vertex;
 
@@ -14,24 +12,24 @@ pub struct Mesh {
     pub(crate) indices: Option<Vec<u32>>,
     pub(crate) _texture: Option<glium::texture::Texture2d>, //? idk
 
-    pub(crate) position: Vec3,
-    pub(crate) scale: Vec3,
+    pub(crate) position: Translation,
+    pub(crate) scale: Scale,
     pub(crate) rotation: Rotation,
 }
 
 impl SceneObject for Mesh {
     #[inline]
-    fn translate(&mut self, trans: Vec3) {
+    fn translate(&mut self, trans: Translation) {
         self.position += trans;
     }
 
     #[inline]
-    fn set_position(&mut self, pos: Vec3) {
+    fn set_position(&mut self, pos: Translation) {
         self.position = pos;
     }
 
     #[inline]
-    fn get_position(&self) -> Vec3 {
+    fn get_position(&self) -> Translation {
         self.position
     }
 
@@ -39,23 +37,21 @@ impl SceneObject for Mesh {
         for vert in self.vertecies.iter_mut() {
             vert.translate(self.position);
         }
-        self.position = Vec3::v_space_zero();
+        self.position = Translation::zero();
     }
 
     #[inline]
-    fn scale(&mut self, scale: Vec3) {
-        for i in 0..3 {
-            self.scale[i] *= scale[i];
-        }
+    fn scale(&mut self, scale: Scale) {
+        self.scale += scale;
     }
 
     #[inline]
-    fn set_scale(&mut self, scale: Vec3) {
+    fn set_scale(&mut self, scale: Scale) {
         self.scale = scale;
     }
 
     #[inline]
-    fn get_scale(&self) -> Vec3 {
+    fn get_scale(&self) -> Scale {
         self.scale
     }
 
@@ -98,8 +94,8 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
             indices: None,
             _texture: None,
 
-            position: Vec3::v_space_zero(),
-            scale: [1., 1., 1.].into(),
+            position: Translation::zero(),
+            scale: Scale::zero(),
             rotation: Rotation::zero(),
         }
     }
@@ -116,8 +112,8 @@ impl Mesh {
             vertecies,
             indices: Some(indices),
             _texture: None,
-            position: Vec3::v_space_zero(),
-            scale: [1.; 3].into(),
+            position: Translation::zero(),
+            scale: Scale::zero(),
             rotation: Rotation::zero(),
         }
     }

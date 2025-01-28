@@ -2,7 +2,7 @@ use core::ops::{Add, AddAssign, Mul, MulAssign};
 
 use my_rust_matrix_lib::my_matrix_lib::prelude::{EuclidianSpace, Field, Ring};
 
-use crate::utils::types_util::QuatF32;
+use crate::utils::types_util::{Mat4, QuatF32};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Rotation {
@@ -110,5 +110,39 @@ impl Rotation {
         let axis = self.value.im / im_lenght;
         
         (angle,(axis[0],axis[1],axis[2]))
+    }
+
+    pub fn to_mat4(self)->Mat4{
+        let (a,b,c,d):(f32,f32,f32,f32) = self.value.into();
+
+        let s = 2./(a*a + b*b + c*c + d*d);
+        let (bs,cs,ds) = (b*s , c*s, d*s);
+        let (ab,ac,ad) = (a*bs,a*cs,a*ds);
+        let (bb,bc,bd) = (b*bs,b*cs,b*ds);
+        let (cc,cd,dd) = (c*cs,c*ds,d*ds);
+
+        [
+            [1.-cc-dd , bc-ad  , bd+ac  ,  0.],
+            [   bc+ad ,1.-bb-dd, cd-ab  ,  0.],
+            [   bd-ac , cd+ab  ,1.-bb-cc,  0.],
+            [     0.  ,   0.   ,   0.   ,  1.],
+        ].into()
+    }
+
+    pub fn to_mat3(self)->Mat3{
+        let (a,b,c,d):(f32,f32,f32,f32) = self.value.into();
+
+        let s = 2./(a*a + b*b + c*c + d*d);
+        let (bs,cs,ds) = (b*s , c*s, d*s);
+        let (ab,ac,ad) = (a*bs,a*cs,a*ds);
+        let (bb,bc,bd) = (b*bs,b*cs,b*ds);
+        let (cc,cd,dd) = (c*cs,c*ds,d*ds);
+
+        [
+            [1.-cc-dd , bc-ad  , bd+ac  ],
+            [   bc+ad ,1.-bb-dd, cd-ab  ],
+            [   bd-ac , cd+ab  ,1.-bb-cc],
+        ].into()
+    }
     }
 }

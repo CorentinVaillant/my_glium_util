@@ -144,5 +144,4 @@ impl Rotation {
             [   bd-ac , cd+ab  ,1.-bb-cc],
         ].into()
     }
-    }
 }

@@ -42,12 +42,13 @@ impl Camera for OrthographicCam{
         let c = ((self.near+self.left)/2.,(self.bottom+self.top)/2.,self.near);
         let s = (2./(self.right-self.left),2./(self.top-self.bottom),-2./(self.far-self.near));
 
-        [
+        self.rotation.to_mat4() *  
+        Mat4::from([
             [s.0, 0.0, 0.0,-c.0],
             [0.0, s.1, 0.0,-c.1],
             [0.0, 0.0, s.2,-c.2],
             [0.0, 0.0, 0.0, 1.0]
-        ].into()
+        ])
     }
 }
 
@@ -117,6 +118,6 @@ impl SceneObject for OrthographicCam{
     }
 
     fn apply_rotation(&mut self) {
-        todo!()
+        ()
     }
 }

@@ -1,4 +1,6 @@
 
+use glium::uniforms::AsUniformValue;
+
 use crate::{object_traits::{Rotation,Scale,Translation, SceneObject}, utils::types_util::Mat4};
 
 pub trait Camera {
@@ -119,5 +121,11 @@ impl SceneObject for OrthographicCam{
 
     fn apply_rotation(&mut self) {
         ()
+    }
+}
+
+impl AsUniformValue for OrthographicCam{
+    fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
+        glium::uniforms::UniformValue::Mat4(self.projection_matrix().into())
     }
 }

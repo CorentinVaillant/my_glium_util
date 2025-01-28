@@ -1,19 +1,19 @@
 use glium::implement_vertex;
 use my_rust_matrix_lib::my_matrix_lib::prelude::{Field, IntoVecMath};
 
-use crate::{object_traits::{Scale, Translation}, utils::types_util::{Arr3F32, QuatF32, Vec3}};
+use crate::{object_traits::{Scale, Translation}, utils::types_util::{Arr3F32, Arr4F32, QuatF32, Vec3}};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vertex {
-    pub(crate) position: Arr3F32,
+    pub(crate) position: Arr4F32,
     pub(crate) normal: Arr3F32,
     pub(crate) texture: Arr3F32,
 }
 
 implement_vertex!(Vertex, position, normal, texture);
 
-impl From<[f32; 3]> for Vertex {
-    fn from(value: [f32; 3]) -> Self {
+impl From<Arr4F32> for Vertex {
+    fn from(value: Arr4F32) -> Self {
         Vertex {
             position: value,
             normal: [0.; 3],
@@ -41,11 +41,11 @@ impl Vertex {
     }
 
     pub fn get_rotated(&self, rotation: QuatF32) -> Self {
-        let mut position: QuatF32 = (0., self.position).into();
+        let mut position: QuatF32 = (0., self.position[1],self.position[2],self.position[3]).into();
         position = rotation * position * rotation.f_mult_inverse();
         let (_, position): (f32, Arr3F32) = position.into();
         Self {
-            position,
+            position:[position[0],position[1],position[2],self.position[3]],
             normal: self.normal,
             texture: self.texture,
         }
@@ -76,9 +76,9 @@ impl Vertex {
 
         let (_, vec): (f64, Vec3) = rotation.into();
         let rotation: QuatF32 = (1., vec).into();
-        (_, self.position) = <QuatF32 as Into<(f32, [f32; 3])>>::into(
+        (_, self.position[0],self.position[3],self.position[2],) = <QuatF32 as Into<(f32,f32,f32,f32)>>::into(
             rotation
-                * <(f32, [f32; 3]) as Into<QuatF32>>::into((0., self.position))
+                * <(f32,f32,f32,f32) as Into<QuatF32>>::into((0., self.position[0],self.position[1],self.position[2]))
                 * rotation.f_mult_inverse(),
         );
     }

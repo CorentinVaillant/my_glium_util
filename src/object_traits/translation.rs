@@ -3,16 +3,18 @@ use core::ops::Index;
 
 use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
-use crate::utils::types_util::{Arr3F32, Vec3};
+use crate::utils::types_util::{Arr3F32, Arr4F32, Vec3, Vec4};
+
+
 
 #[derive(Debug,Clone, Copy)]
 pub struct Translation{
-    inner:Vec3
+    inner:Vec4
 }
 
 impl Translation{
     pub fn zero()->Self{
-        Vec3::v_space_zero().into()
+        Vec4::v_space_zero().into()
     }
 
     pub fn inverse(&self)->Self{
@@ -21,31 +23,52 @@ impl Translation{
 }
 
 
-impl From<Vec3> for Translation{
-    fn from(value: Vec3) -> Self {
+impl From<Vec4> for Translation{
+    fn from(value: Vec4) -> Self {
         Self { inner: value }
     }
 }
 
-impl From<Translation> for Vec3{
+impl From<Translation> for Vec4{
     fn from(value: Translation) -> Self {
         value.inner
     }
 }
 
-impl From<Arr3F32> for Translation{
-    fn from(value: Arr3F32) -> Self {
+impl From<Translation> for Vec3{
+    fn from(value: Translation) -> Self {
+        [value.inner[0],value.inner[1],value.inner[2]].into()
+    }
+}
+
+impl From<Arr4F32> for Translation{
+    fn from(value: Arr4F32) -> Self {
         Self{
             inner : value.into()
         }
     }
 }
 
-impl From<Translation> for Arr3F32{
+impl From<Arr3F32> for Translation{
+    fn from(value: Arr3F32) -> Self {
+        Self{
+            inner : [value[0],value[1],value[2],1.].into()
+        }
+    }
+}
+
+impl From<Translation> for Arr4F32{
     fn from(value: Translation) -> Self {
         value.inner.into()
     }
 }
+
+impl From<Translation> for Arr3F32{
+    fn from(value: Translation) -> Self {
+        [value.inner[0],value.inner[1],value.inner[2]]
+    }
+}
+
 
 impl  Add for Translation{
     type Output=Self;

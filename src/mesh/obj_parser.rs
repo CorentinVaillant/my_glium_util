@@ -43,7 +43,7 @@ impl WaveFrontParsable for Mesh {
             .lines()
         {
             match line_type(line) {
-                WaveFrontLineType::GeoVertex => geo_vert_data.push(parse_tree_float(line, 0.)),
+                WaveFrontLineType::GeoVertex => geo_vert_data.push(parse_four_float(line, 1.)),
                 WaveFrontLineType::TextureVertex => {
                     texture_vert_data.push(parse_tree_float(line, 0.))
                 }
@@ -151,6 +151,25 @@ fn parse_tree_float(line: &str, default: f32) -> [f32; 3] {
     let mut indice = 0;
     for split in line.split(" ") {
         if indice > 3 {
+            return result;
+        }
+        match split.parse() {
+            Ok(val) => {
+                result[indice] = val;
+                indice += 1;
+            }
+            _ => (),
+        };
+    }
+
+    result
+}
+
+fn parse_four_float(line: &str, default: f32) -> [f32; 4] {
+    let mut result = [default; 4];
+    let mut indice = 0;
+    for split in line.split(" ") {
+        if indice > 4 {
             return result;
         }
         match split.parse() {

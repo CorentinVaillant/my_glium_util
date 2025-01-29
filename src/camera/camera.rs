@@ -44,21 +44,21 @@ impl OrthographicCam {
 impl Camera for OrthographicCam {
     fn projection_matrix(&self) -> Mat4 {
         let c = (
-            (self.near + self.left) / 2.,
-            (self.bottom + self.top) / 2.,
-            self.near,
+            -(self.right+self.left) / (self.right-self.left),
+            -(self.top+self.bottom) / (self.top-self.bottom),
+            -(self.far+self.near)   / (self.far-self.near),
         );
         let s = (
-            2. / (self.right - self.left),
-            2. / (self.top - self.bottom),
+             2. / (self.right - self.left),
+             2. / (self.top - self.bottom),
             -2. / (self.far - self.near),
         );
 
         self.rotation.to_mat4()
             * Mat4::from([
-                [s.0, 0.0, 0.0, -c.0],
-                [0.0, s.1, 0.0, -c.1],
-                [0.0, 0.0, s.2, -c.2],
+                [s.0, 0.0, 0.0, c.0],
+                [0.0, s.1, 0.0, c.1],
+                [0.0, 0.0, s.2, c.2],
                 [0.0, 0.0, 0.0, 1.0],
             ])
     }

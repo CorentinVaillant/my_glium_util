@@ -21,7 +21,8 @@ pub trait SceneObject {
 }
 
 pub trait GetableSceneObject
-where Self:SceneObject
+where
+    Self: SceneObject,
 {
     fn get_position(&self) -> Translation;
     fn get_scale(&self) -> Scale;
@@ -29,7 +30,8 @@ where Self:SceneObject
 }
 
 pub trait ApplicableSceneObject
-where Self : SceneObject
+where
+    Self: SceneObject,
 {
     fn apply_position(&mut self);
     fn apply_scale(&mut self);

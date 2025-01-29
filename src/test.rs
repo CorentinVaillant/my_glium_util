@@ -2,7 +2,7 @@
 mod test {
     use crate::mesh::mesh::Mesh;
     use crate::mesh::obj_parser::WaveFrontParsable;
-    use crate::object_traits::{Rotation, SceneObject};
+    use crate::object_traits::{ApplicableSceneObject, Rotation, SceneObject};
 
     macro_rules! chrono {
         ($func:expr,$($arg:tt)*) => {{

@@ -7,43 +7,35 @@ use crate::{
 
 pub trait Camera {
     fn projection_matrix(&self) -> Mat4;
+
+    fn view_matrix(&self) -> Mat4;
+
+    fn view_projection_matrix(&self) -> Mat4 {
+        self.projection_matrix() * self.view_matrix()
+    }
 }
 
 #[derive(Debug, Clone, Copy)]
+
 pub struct OrthographicCam {
-    right: f32,
-    top: f32,
+    position: Translation,
+    width: f32,
+    height: f32,
+    near: f32,
     far: f32,
 
-    left: f32,
-    bottom: f32,
-    near: f32,
-
-    position: Translation,
     scale: Scale,
     rotation: Rotation,
 }
 
-/* TODO
-pub struct OrthographicCam {
-    position :Translation,
-    width : f32,
-    height: f32,
-    near : f32,
-    far : f32,
-} */
-
 impl OrthographicCam {
-    pub fn new(right: f32, top: f32, far: f32, left: f32, bottom: f32, near: f32) -> Self {
+    pub fn new(position: Translation, width: f32, height: f32, near: f32, far: f32) -> Self {
         Self {
-            right,
-            top,
-            far,
-            left,
-            bottom,
+            position,
+            width,
+            height,
             near,
-
-            position: Translation::zero(),
+            far,
             scale: Scale::zero(),
             rotation: Rotation::zero(),
         }
@@ -52,24 +44,43 @@ impl OrthographicCam {
 
 impl Camera for OrthographicCam {
     fn projection_matrix(&self) -> Mat4 {
+        let right = self.scale.x() * self.width / 2.0;
+        let left = -right;
+        let top = self.scale.z() * self.height / 2.0;
+        let bottom = -top;
+
         let c = (
-            -(self.right+self.left) / (self.right-self.left),
-            -(self.top+self.bottom) / (self.top-self.bottom),
-            -(self.far+self.near)   / (self.far-self.near),
+            -(right + left) / (right - left),
+            -(top + bottom) / (top - bottom),
+            -(self.far + self.near) / (self.far - self.near),
         );
         let s = (
-             2. / (self.right - self.left),
-             2. / (self.top - self.bottom),
+            2. / (right - left),
+            2. / (top - bottom),
             -2. / (self.far - self.near),
         );
- 
-        self.rotation.to_mat4()
-            * Mat4::from([
-                [s.0, 0.0, 0.0, c.0],
-                [0.0, s.1, 0.0, c.1],
-                [0.0, 0.0, s.2, c.2],
-                [0.0, 0.0, 0.0, 1.0],
-            ])
+
+        Mat4::from([
+            [s.0, 0.0, 0.0, 0.0],
+            [0.0, s.1, 0.0, 0.0],
+            [0.0, 0.0, s.2, 0.0],
+            [c.0, c.1, c.2, 1.0],
+        ])
+    }
+
+    fn view_matrix(&self) -> Mat4 {
+        let [x, y, z] = self.position.into();
+
+        // Create a translation matrix based on the camera's position
+        let translation = Mat4::from([
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [-x, -y, -z, 1.0],
+        ]);
+
+        // Apply the camera's rotation
+        self.rotation.to_mat4() * translation
     }
 }
 
@@ -82,8 +93,6 @@ impl SceneObject for OrthographicCam {
         self.position = pos;
     }
 
-
-
     fn scale(&mut self, scale: Scale) {
         self.scale += scale
     }
@@ -92,8 +101,6 @@ impl SceneObject for OrthographicCam {
         self.scale = scale
     }
 
-
-
     fn rotate(&mut self, rotation: crate::object_traits::Rotation) {
         self.rotation += rotation
     }
@@ -101,7 +108,6 @@ impl SceneObject for OrthographicCam {
     fn set_rotation(&mut self, rotation: crate::object_traits::Rotation) {
         self.rotation = rotation;
     }
-
 }
 
 impl AsUniformValue for OrthographicCam {

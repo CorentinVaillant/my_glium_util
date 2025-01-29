@@ -1,6 +1,9 @@
 use glium::Surface;
 
-use crate::object_traits::{ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject, Translation};
+use crate::object_traits::{
+    ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject,
+    Translation,
+};
 
 use super::vertex::Vertex;
 
@@ -28,7 +31,6 @@ impl SceneObject for Mesh {
         self.position = pos;
     }
 
-
     #[inline]
     fn scale(&mut self, scale: Scale) {
         self.scale += scale;
@@ -39,7 +41,6 @@ impl SceneObject for Mesh {
         self.scale = scale;
     }
 
-
     #[inline]
     fn rotate(&mut self, rotation: Rotation) {
         self.rotation += rotation;
@@ -49,11 +50,9 @@ impl SceneObject for Mesh {
     fn set_rotation(&mut self, rotation: Rotation) {
         self.rotation = rotation;
     }
-
-
 }
 
-impl GetableSceneObject for Mesh{
+impl GetableSceneObject for Mesh {
     #[inline]
     fn get_position(&self) -> Translation {
         self.position
@@ -68,18 +67,15 @@ impl GetableSceneObject for Mesh{
     fn get_rotation(&self) -> Rotation {
         self.rotation
     }
-
 }
 
-impl ApplicableSceneObject for Mesh{
-
+impl ApplicableSceneObject for Mesh {
     fn apply_position(&mut self) {
         for vert in self.vertecies.iter_mut() {
             vert.translate(self.position);
         }
         self.position = Translation::zero();
     }
-
 
     fn apply_scale(&mut self) {
         for vert in self.vertecies.iter_mut() {
@@ -88,14 +84,12 @@ impl ApplicableSceneObject for Mesh{
         self.scale = [1.; 3].into();
     }
 
-
     fn apply_rotation(&mut self) {
         for vert in self.vertecies.iter_mut() {
             vert.rotate(self.rotation.into());
         }
         self.rotation = Rotation::zero();
     }
-
 }
 
 impl<A: Into<Vec<Vertex>>> From<A> for Mesh {

@@ -112,6 +112,6 @@ impl SceneObject for OrthographicCam {
 
 impl AsUniformValue for OrthographicCam {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
-        glium::uniforms::UniformValue::Mat4(self.projection_matrix().into())
+        glium::uniforms::UniformValue::Mat4(self.view_projection_matrix().into())
     }
 }

@@ -60,6 +60,8 @@ impl WaveFrontParsable for Mesh {
                 WaveFrontLineType::Unknow => {
                     debug_println!("Unknow or not yet implemented line :{}", line)
                 }
+
+                #[allow(unused_variables)]
                 other => debug_println!("{:#?} not implemented yet", other),
             }
         }

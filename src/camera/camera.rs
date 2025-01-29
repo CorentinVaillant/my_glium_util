@@ -24,6 +24,15 @@ pub struct OrthographicCam {
     rotation: Rotation,
 }
 
+/* TODO
+pub struct OrthographicCam {
+    position :Translation,
+    width : f32,
+    height: f32,
+    near : f32,
+    far : f32,
+} */
+
 impl OrthographicCam {
     pub fn new(right: f32, top: f32, far: f32, left: f32, bottom: f32, near: f32) -> Self {
         Self {
@@ -53,7 +62,7 @@ impl Camera for OrthographicCam {
              2. / (self.top - self.bottom),
             -2. / (self.far - self.near),
         );
-
+ 
         self.rotation.to_mat4()
             * Mat4::from([
                 [s.0, 0.0, 0.0, c.0],
@@ -73,27 +82,7 @@ impl SceneObject for OrthographicCam {
         self.position = pos;
     }
 
-    fn get_position(&self) -> Translation {
-        self.position
-    }
 
-    fn apply_position(&mut self) {
-        let c = (
-            (self.near + self.left) / 2.,
-            (self.bottom + self.top) / 2.,
-            self.near,
-        );
-        let [x, y, z]: [f32; 3] = self.position.into();
-
-        self.right = x + c.0;
-        self.left = x - c.0;
-
-        self.far = y + c.0;
-        self.near = y - c.0;
-
-        self.top = z + c.0;
-        self.bottom = z - c.0;
-    }
 
     fn scale(&mut self, scale: Scale) {
         self.scale += scale
@@ -103,22 +92,7 @@ impl SceneObject for OrthographicCam {
         self.scale = scale
     }
 
-    fn get_scale(&self) -> Scale {
-        self.scale
-    }
 
-    fn apply_scale(&mut self) {
-        self.right *= self.scale['x'];
-        self.left *= self.scale['x'];
-
-        self.far *= self.scale['y'];
-        self.near *= self.scale['y'];
-
-        self.top *= self.scale['z'];
-        self.bottom *= self.scale['z'];
-
-        self.scale = Scale::zero();
-    }
 
     fn rotate(&mut self, rotation: crate::object_traits::Rotation) {
         self.rotation += rotation
@@ -128,11 +102,6 @@ impl SceneObject for OrthographicCam {
         self.rotation = rotation;
     }
 
-    fn get_rotation(&self) -> crate::object_traits::Rotation {
-        self.rotation
-    }
-
-    fn apply_rotation(&mut self) {}
 }
 
 impl AsUniformValue for OrthographicCam {

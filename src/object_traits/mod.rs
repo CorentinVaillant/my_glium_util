@@ -12,19 +12,28 @@ mod translation;
 pub trait SceneObject {
     fn translate(&mut self, trans: Translation);
     fn set_position(&mut self, pos: Translation);
-    fn get_position(&self) -> Translation;
-    fn apply_position(&mut self);
 
     fn scale(&mut self, scale: Scale);
     fn set_scale(&mut self, scale: Scale);
-    fn get_scale(&self) -> Scale;
-    fn apply_scale(&mut self);
 
     fn rotate(&mut self, rotation: Rotation);
     fn set_rotation(&mut self, rotation: Rotation);
-    fn get_rotation(&self) -> Rotation;
-    fn apply_rotation(&mut self);
+}
 
+pub trait GetableSceneObject
+where Self:SceneObject
+{
+    fn get_position(&self) -> Translation;
+    fn get_scale(&self) -> Scale;
+    fn get_rotation(&self) -> Rotation;
+}
+
+pub trait ApplicableSceneObject
+where Self : SceneObject
+{
+    fn apply_position(&mut self);
+    fn apply_scale(&mut self);
+    fn apply_rotation(&mut self);
     #[inline]
     fn apply_all_transforms(&mut self) {
         self.apply_rotation();

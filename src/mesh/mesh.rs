@@ -1,6 +1,6 @@
 use glium::Surface;
 
-use crate::object_traits::{Renderable, Rotation, Scale, SceneObject, Translation};
+use crate::object_traits::{ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject, Translation};
 
 use super::vertex::Vertex;
 
@@ -28,17 +28,6 @@ impl SceneObject for Mesh {
         self.position = pos;
     }
 
-    #[inline]
-    fn get_position(&self) -> Translation {
-        self.position
-    }
-
-    fn apply_position(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.translate(self.position);
-        }
-        self.position = Translation::zero();
-    }
 
     #[inline]
     fn scale(&mut self, scale: Scale) {
@@ -50,17 +39,6 @@ impl SceneObject for Mesh {
         self.scale = scale;
     }
 
-    #[inline]
-    fn get_scale(&self) -> Scale {
-        self.scale
-    }
-
-    fn apply_scale(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.scale(self.scale);
-        }
-        self.scale = [1.; 3].into();
-    }
 
     #[inline]
     fn rotate(&mut self, rotation: Rotation) {
@@ -72,10 +50,44 @@ impl SceneObject for Mesh {
         self.rotation = rotation;
     }
 
+
+}
+
+impl GetableSceneObject for Mesh{
+    #[inline]
+    fn get_position(&self) -> Translation {
+        self.position
+    }
+
+    #[inline]
+    fn get_scale(&self) -> Scale {
+        self.scale
+    }
+
     #[inline]
     fn get_rotation(&self) -> Rotation {
         self.rotation
     }
+
+}
+
+impl ApplicableSceneObject for Mesh{
+
+    fn apply_position(&mut self) {
+        for vert in self.vertecies.iter_mut() {
+            vert.translate(self.position);
+        }
+        self.position = Translation::zero();
+    }
+
+
+    fn apply_scale(&mut self) {
+        for vert in self.vertecies.iter_mut() {
+            vert.scale(self.scale);
+        }
+        self.scale = [1.; 3].into();
+    }
+
 
     fn apply_rotation(&mut self) {
         for vert in self.vertecies.iter_mut() {
@@ -83,6 +95,7 @@ impl SceneObject for Mesh {
         }
         self.rotation = Rotation::zero();
     }
+
 }
 
 impl<A: Into<Vec<Vertex>>> From<A> for Mesh {

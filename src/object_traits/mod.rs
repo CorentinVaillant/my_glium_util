@@ -5,6 +5,7 @@ mod rotation;
 pub use rotation::Rotation;
 pub use scale::Scale;
 pub use translation::Translation;
+
 mod scale;
 mod translation;
 
@@ -26,9 +27,9 @@ pub trait SceneObject {
 
     #[inline]
     fn apply_all_transforms(&mut self) {
-        self.apply_position();
-        self.apply_scale();
         self.apply_rotation();
+        self.apply_scale();
+        self.apply_position();
     }
 }
 

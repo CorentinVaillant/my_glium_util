@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use glium::uniforms::AsUniformValue;
 
 use crate::{
@@ -15,17 +16,16 @@ pub trait Camera {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-
+#[derive(Debug, Clone)]
 pub struct OrthographicCam {
     position: Translation,
     width: f32,
     height: f32,
     near: f32,
     far: f32,
-
     scale: Scale,
     rotation: Rotation,
+    view_proj_mat: RefCell<Option<Mat4>>,
 }
 
 impl OrthographicCam {
@@ -38,7 +38,12 @@ impl OrthographicCam {
             far,
             scale: Scale::zero(),
             rotation: Rotation::zero(),
+            view_proj_mat: RefCell::new(None),
         }
+    }
+
+    fn invalidate_cache(&self) {
+        self.view_proj_mat.replace(None);
     }
 }
 
@@ -71,7 +76,6 @@ impl Camera for OrthographicCam {
     fn view_matrix(&self) -> Mat4 {
         let [x, y, z] = self.position.into();
 
-        // Create a translation matrix based on the camera's position
         let translation = Mat4::from([
             [1.0, 0.0, 0.0, 0.0],
             [0.0, 1.0, 0.0, 0.0],
@@ -79,34 +83,48 @@ impl Camera for OrthographicCam {
             [-x, -y, -z, 1.0],
         ]);
 
-        // Apply the camera's rotation
-        self.rotation.to_mat4() * translation
+        translation * self.rotation.to_mat4()
+    }
+
+    fn view_projection_matrix(&self) -> Mat4 {
+        if let Some(mat) = *self.view_proj_mat.borrow() {
+            return mat;
+        }
+        let mat = self.projection_matrix() * self.view_matrix();
+        self.view_proj_mat.replace(Some(mat));
+        mat
     }
 }
 
 impl SceneObject for OrthographicCam {
     fn translate(&mut self, trans: Translation) {
         self.position += trans;
+        self.invalidate_cache();
     }
 
     fn set_position(&mut self, pos: Translation) {
         self.position = pos;
+        self.invalidate_cache();
     }
 
     fn scale(&mut self, scale: Scale) {
-        self.scale += scale
+        self.scale += scale;
+        self.invalidate_cache();
     }
 
     fn set_scale(&mut self, scale: Scale) {
-        self.scale = scale
+        self.scale = scale;
+        self.invalidate_cache();
     }
 
     fn rotate(&mut self, rotation: crate::object_traits::Rotation) {
-        self.rotation += rotation
+        self.rotation += rotation;
+        self.invalidate_cache();
     }
 
     fn set_rotation(&mut self, rotation: crate::object_traits::Rotation) {
         self.rotation = rotation;
+        self.invalidate_cache();
     }
 }
 

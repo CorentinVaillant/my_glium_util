@@ -1,20 +1,9 @@
 use glium::{
     glutin::surface::WindowSurface,
     winit::{self, application::ApplicationHandler},
-    Display,
 };
 
-pub trait ApplicationContext {
-    fn draw_frame(&mut self, _display: &Display<WindowSurface>) {}
-    fn new(display: &Display<WindowSurface>) -> Self;
-    fn update(&mut self) {}
-    fn handle_window_event(
-        &mut self,
-        _event: &glium::winit::event::WindowEvent,
-        _window: &glium::winit::window::Window,
-    ) {
-    }
-}
+use super::ApplicationContext;
 
 pub struct State<T> {
     pub display: glium::Display<WindowSurface>,
@@ -126,6 +115,35 @@ impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
     fn about_to_wait(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
         if let Some(state) = &self.state {
             state.window.request_redraw();
+        }
+    }
+
+    fn device_event(
+            &mut self,
+            event_loop: &winit::event_loop::ActiveEventLoop,
+            device_id: winit::event::DeviceId,
+            event: winit::event::DeviceEvent,
+        ) {
+        if let Some(state) = &mut self.state{
+            state.context.handle_device_event(event_loop, device_id, event);
+        }
+    }
+
+    fn new_events(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, cause: winit::event::StartCause) {
+        if let Some(state) = &mut self.state{
+            state.context.handle_event(event_loop, cause);
+        }
+    }
+
+    fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _event: ()) {
+        if let Some(state) = &mut self.state{
+            state.context.handle_user_event(event_loop);
+        }
+    }
+
+    fn exiting(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
+        if let Some(state) = &mut self.state{
+            state.context.on_exiting(event_loop);
         }
     }
 }

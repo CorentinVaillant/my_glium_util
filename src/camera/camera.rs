@@ -7,6 +7,8 @@ use crate::{
 };
 
 pub trait Camera {
+    fn zoom(&mut self,factor:f32);
+
     fn projection_matrix(&self) -> Mat4;
 
     fn view_matrix(&self) -> Mat4;
@@ -48,6 +50,11 @@ impl OrthographicCam {
 }
 
 impl Camera for OrthographicCam {
+    fn zoom(&mut self,factor:f32) {
+        self.scale *= factor;
+        self.invalidate_cache();
+    }
+
     fn projection_matrix(&self) -> Mat4 {
         let right = self.scale.x() * self.width / 2.0;
         let left = -right;

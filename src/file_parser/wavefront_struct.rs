@@ -10,7 +10,7 @@ pub struct WavefrontObj{
     
 //vertex data
     pub(crate) geometric_vertices :      Vec<[f32;4]>,
-    pub(crate) texture_verices :         Vec<[f32;3]>,
+    pub(crate) texture_vertices :         Vec<[f32;3]>,
     pub(crate) vertex_normals :          Vec<[f32;3]>,
     pub(crate) parameter_space_vertices :Vec<[f32;3]>,
 
@@ -18,7 +18,7 @@ pub struct WavefrontObj{
     //not implemented
 
 //Elements
-    pub(crate)point: Vec<u32>,
+    pub(crate)points: Vec<Vec<i32>>,
     pub(crate)line : Vec<WavefrontLine>,
     pub(crate)face : Vec<WavefrontFace>,
 
@@ -41,34 +41,34 @@ pub struct WavefrontObj{
 //Comments
     pub(crate)comments :Vec<String>
 }
-#[derive(Debug,Clone, Copy)]
+#[derive(Debug,Clone)]
 pub(crate) struct WavefrontLine{
-    pub(crate)vertex_index : u32,
-    pub(crate)texture_vertex_index : Option<u32>
+    pub(crate)vertex_indices : Vec<i32>,
+    pub(crate)texture_vertex_indices : Option<Vec<i32>>
 }
 
-#[derive(Debug,Clone, Copy)]
+#[derive(Debug,Clone)]
 pub(crate) struct WavefrontFace{
-    pub(crate)vertex_index :u32,
-    pub(crate)texture_vertex_index : Option<u32>,
-    pub(crate)normal_vertex_index : Option<u32>,
+    pub(crate)vertex_indices :Vec<i32>,
+    pub(crate)texture_vertex_indices : Option<Vec<i32>>,
+    pub(crate)normal_vertex_indices : Option<Vec<i32>>,
 }
 
 #[derive(Debug,Clone)]
 pub(crate) struct WavefrontGroup{
     pub(crate)name : String,
-    pub(crate)start_index : u32,
-    pub(crate)end_index : u32,
+    pub(crate)start_index : i32,
+    pub(crate)end_index : i32,
 }
 
 impl WavefrontObj{
     pub fn empty()->Self{
         Self { 
             geometric_vertices: vec![], 
-            texture_verices: vec![], 
+            texture_vertices: vec![], 
             vertex_normals: vec![], 
             parameter_space_vertices: vec![], 
-            point: vec![], 
+            points: vec![], 
             line: vec![], 
             face: vec![], 
             curv: (), 

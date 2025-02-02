@@ -1,5 +1,5 @@
-use std::cell::RefCell;
 use glium::uniforms::AsUniformValue;
+use std::cell::RefCell;
 
 use crate::{
     object_traits::{Rotation, Scale, SceneObject, Translation},
@@ -7,7 +7,7 @@ use crate::{
 };
 
 pub trait Camera {
-    fn zoom(&mut self,factor:f32);
+    fn zoom(&mut self, factor: f32);
 
     fn projection_matrix(&self) -> Mat4;
 
@@ -50,7 +50,7 @@ impl OrthographicCam {
 }
 
 impl Camera for OrthographicCam {
-    fn zoom(&mut self,factor:f32) {
+    fn zoom(&mut self, factor: f32) {
         self.scale *= factor;
         self.invalidate_cache();
     }
@@ -144,5 +144,39 @@ impl AsUniformValue for OrthographicCam {
 impl AsUniformValue for &OrthographicCam {
     fn as_uniform_value(&self) -> glium::uniforms::UniformValue<'_> {
         glium::uniforms::UniformValue::Mat4(self.view_projection_matrix().into())
+    }
+}
+
+impl OrthographicCam {
+    pub fn set_width(&mut self, width: f32) {
+        self.width = width;
+    }
+
+    pub fn set_height(&mut self, height: f32) {
+        self.height = height;
+    }
+
+    pub fn set_far(&mut self, far: f32) {
+        self.far = far;
+    }
+
+    pub fn set_near(&mut self, near: f32) {
+        self.near = near;
+    }
+
+    pub fn get_width(&self) -> f32 {
+        self.width
+    }
+
+    pub fn get_heigt(&self) -> f32 {
+        self.height
+    }
+
+    pub fn get_far(&self) -> f32 {
+        self.far
+    }
+
+    pub fn get_near(&self) -> f32 {
+        self.near
     }
 }

@@ -119,30 +119,36 @@ impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
     }
 
     fn device_event(
-            &mut self,
-            event_loop: &winit::event_loop::ActiveEventLoop,
-            device_id: winit::event::DeviceId,
-            event: winit::event::DeviceEvent,
-        ) {
-        if let Some(state) = &mut self.state{
-            state.context.handle_device_event(event_loop, device_id, event);
+        &mut self,
+        event_loop: &winit::event_loop::ActiveEventLoop,
+        device_id: winit::event::DeviceId,
+        event: winit::event::DeviceEvent,
+    ) {
+        if let Some(state) = &mut self.state {
+            state
+                .context
+                .handle_device_event(event_loop, device_id, event);
         }
     }
 
-    fn new_events(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, cause: winit::event::StartCause) {
-        if let Some(state) = &mut self.state{
+    fn new_events(
+        &mut self,
+        event_loop: &winit::event_loop::ActiveEventLoop,
+        cause: winit::event::StartCause,
+    ) {
+        if let Some(state) = &mut self.state {
             state.context.handle_event(event_loop, cause);
         }
     }
 
     fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _event: ()) {
-        if let Some(state) = &mut self.state{
+        if let Some(state) = &mut self.state {
             state.context.handle_user_event(event_loop);
         }
     }
 
     fn exiting(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        if let Some(state) = &mut self.state{
+        if let Some(state) = &mut self.state {
             state.context.on_exiting(event_loop);
         }
     }

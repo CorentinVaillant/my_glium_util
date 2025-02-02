@@ -150,18 +150,22 @@ impl AsUniformValue for &OrthographicCam {
 impl OrthographicCam {
     pub fn set_width(&mut self, width: f32) {
         self.width = width;
+        self.invalidate_cache();
     }
 
     pub fn set_height(&mut self, height: f32) {
         self.height = height;
+        self.invalidate_cache();
     }
 
     pub fn set_far(&mut self, far: f32) {
         self.far = far;
+        self.invalidate_cache();
     }
 
     pub fn set_near(&mut self, near: f32) {
         self.near = near;
+        self.invalidate_cache();
     }
 
     pub fn get_width(&self) -> f32 {

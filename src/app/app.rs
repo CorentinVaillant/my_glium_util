@@ -103,12 +103,10 @@ impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
                 event_loop.exit();
                 std::process::exit(0);
             }
-
-            ev => {
-                if let Some(state) = &mut self.state {
-                    state.context.handle_window_event(&ev, &state.window);
-                }
-            }
+            _=>()
+        }
+        if let Some(state) = &mut self.state {
+            state.context.handle_window_event(&event, &state.window);
         }
     }
 

@@ -9,10 +9,10 @@ pub type NotImpl =();
 pub struct WavefrontObj{
     
 //vertex data
-    pub(crate) geometric_vertices :      [f32;4],
-    pub(crate) texture_verices :         [f32;3],
-    pub(crate) vertex_normals :          [f32;3],
-    pub(crate) parameter_space_vertices :[f32;3],
+    pub(crate) geometric_vertices :      Vec<[f32;4]>,
+    pub(crate) texture_verices :         Vec<[f32;3]>,
+    pub(crate) vertex_normals :          Vec<[f32;3]>,
+    pub(crate) parameter_space_vertices :Vec<[f32;3]>,
 
 //Free-form curve/surface attributes
     //not implemented
@@ -30,10 +30,10 @@ pub struct WavefrontObj{
     //not implemented
 
 //Grouping
-    pub(crate)groupe_name:    Vec<WavefrontGroup>,
+    pub(crate)group_name:    Vec<WavefrontGroup>,
     pub(crate)smoothing_group:NotImpl,
     pub(crate)merging_group:  NotImpl,
-    pub(crate)object_name:    String,
+    pub(crate)object_name:    Option<String>,
 
 //Display/render attributes
     //not implemented
@@ -59,4 +59,26 @@ pub(crate) struct WavefrontGroup{
     pub(crate)name : String,
     pub(crate)start_index : u32,
     pub(crate)end_index : u32,
+}
+
+impl WavefrontObj{
+    pub fn empty()->Self{
+        Self { 
+            geometric_vertices: vec![], 
+            texture_verices: vec![], 
+            vertex_normals: vec![], 
+            parameter_space_vertices: vec![], 
+            point: vec![], 
+            line: vec![], 
+            face: vec![], 
+            curv: (), 
+            curv2: (), 
+            surface: (), 
+            group_name: vec![], 
+            object_name: None, 
+            comments: vec![],
+            smoothing_group: (),
+            merging_group: () 
+        }
+    }
 }

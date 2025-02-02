@@ -1,6 +1,6 @@
 use glium::{
     glutin::surface::WindowSurface,
-    winit::{self, application::ApplicationHandler},
+    winit::{self, application::ApplicationHandler, error::EventLoopError},
 };
 
 use super::ApplicationContext;
@@ -25,6 +25,11 @@ impl<T> App<T> {
     }
 }
 
+#[derive(Debug)]
+pub enum StateError {
+    EventLoopError(EventLoopError),
+}
+
 impl<T: ApplicationContext> State<T> {
     pub fn new(event_loop: &glium::winit::event_loop::ActiveEventLoop, window_title: &str) -> Self {
         let (window, display) = glium::backend::glutin::SimpleWindowBuilder::new()
@@ -45,18 +50,17 @@ impl<T: ApplicationContext> State<T> {
             context,
         }
     }
-    #[allow(dead_code)]
-    pub fn run() {
+    pub fn run() -> Result<(), StateError> {
         let event_loop = glium::winit::event_loop::EventLoop::builder()
             .build()
-            .expect("event loop building in State::run_loop()");
+            .map_err(|e| StateError::EventLoopError(e))?;
         let mut app = App::<T> {
             state: None,
             app_name: "My App", //TODO
         };
 
         let result = event_loop.run_app(&mut app);
-        result.unwrap();
+        result.map_err(|e| StateError::EventLoopError(e))
     }
 }
 
@@ -103,7 +107,7 @@ impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
                 event_loop.exit();
                 std::process::exit(0);
             }
-            _=>()
+            _ => (),
         }
         if let Some(state) = &mut self.state {
             state.context.handle_window_event(&event, &state.window);
@@ -139,7 +143,7 @@ impl<T: ApplicationContext> ApplicationHandler<()> for App<T> {
         }
     }
 
-    fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _event: ()) {
+    fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, _: ()) {
         if let Some(state) = &mut self.state {
             state.context.handle_user_event(event_loop);
         }

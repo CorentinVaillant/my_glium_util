@@ -172,7 +172,7 @@ impl OrthographicCam {
         self.width
     }
 
-    pub fn get_heigt(&self) -> f32 {
+    pub fn get_height(&self) -> f32 {
         self.height
     }
 

@@ -1,10 +1,7 @@
-//TODO obj parse !
-
 use std::{fs::read_to_string, path::Path};
 
-use crate::mesh::vertex::Vertex;
+use crate::mesh::{mesh::Mesh, vertex::Vertex};
 
-use super::mesh::Mesh;
 use crate::utils::macro_util::debug_println;
 
 pub trait WaveFrontParsable {

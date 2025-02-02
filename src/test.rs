@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
     use crate::mesh::mesh::Mesh;
-    use crate::mesh::obj_parser::WaveFrontParsable;
+    use crate::file_parser::WaveFrontParsable;
     use crate::object_traits::{ApplicableSceneObject, Rotation, SceneObject};
 
     macro_rules! chrono {

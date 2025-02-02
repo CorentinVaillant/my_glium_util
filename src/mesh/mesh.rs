@@ -1,4 +1,4 @@
-use glium::Surface;
+use glium::{Surface, VertexBuffer};
 
 use crate::object_traits::{
     ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject,
@@ -90,6 +90,18 @@ impl ApplicableSceneObject for Mesh {
         }
         self.rotation = Rotation::zero();
     }
+
+    fn apply_all_transforms(&mut self) {
+        for vert in self.vertecies.iter_mut() {
+            vert.translate(self.position);
+            vert.scale(self.scale);
+            vert.rotate(self.rotation.into());
+        }
+
+        self.position = Translation::zero();
+        self.scale = Scale::zero();
+        self.rotation = Rotation::zero();
+    }
 }
 
 impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
@@ -131,17 +143,14 @@ impl Mesh {
         self.vertecies.len()
     }
 
-    pub fn to_vertex_buffer<F: glium::backend::Facade>(
-        &self,
-        facade: &F,
-    ) -> Result<glium::vertex::VertexBuffer<Vertex>, glium::vertex::BufferCreationError> {
+    pub fn load_into_vertex_buffer(&self, buffer: &mut VertexBuffer<Vertex>) {
         let vertecies: Vec<Vertex> = self
             .vertecies
             .iter()
             .map(|vert| vert.get_transform(self.position, self.scale, self.rotation.into()))
             .collect();
 
-        glium::vertex::VertexBuffer::new(facade, &vertecies)
+        buffer.write(&vertecies);
     }
 
     pub fn to_index_buffer<F: glium::backend::Facade>(
@@ -160,8 +169,14 @@ impl Mesh {
     }
 }
 
+pub enum MeshRenderError {
+    VertexBufferCreationError(glium::vertex::BufferCreationError),
+    DrawError(glium::DrawError),
+    IndiceBufferCreationError(glium::index::BufferCreationError),
+}
+
 impl Renderable for Mesh {
-    type RenderError = glium::DrawError;
+    type RenderError = MeshRenderError;
 
     fn render<F: glium::backend::Facade>(
         &self,
@@ -174,16 +189,23 @@ impl Renderable for Mesh {
         >,
         draw_parameters: &glium::DrawParameters,
     ) -> Result<(), Self::RenderError> {
-        let vertex_buffer = self.to_vertex_buffer(facade).unwrap(); // !Scotch
+        let mut vertex_buffer: VertexBuffer<Vertex> =
+            glium::VertexBuffer::empty(facade, self.vertecies_number())
+                .map_err(|e| MeshRenderError::VertexBufferCreationError(e))?;
+        self.load_into_vertex_buffer(&mut vertex_buffer);
 
-        let index_buffer = self.to_index_buffer(facade).unwrap(); // !Scotch
+        let index_buffer = self
+            .to_index_buffer(facade)
+            .map_err(|e| MeshRenderError::IndiceBufferCreationError(e))?;
 
-        target.draw(
-            &vertex_buffer,
-            &index_buffer,
-            program,
-            uniforms,
-            draw_parameters,
-        )
+        target
+            .draw(
+                &vertex_buffer,
+                &index_buffer,
+                program,
+                uniforms,
+                draw_parameters,
+            )
+            .map_err(|e| MeshRenderError::DrawError(e))
     }
 }

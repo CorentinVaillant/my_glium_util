@@ -12,14 +12,13 @@ impl WavefrontParsable for WavefrontObj {
         let mut lines = data.lines();
         let mut current_line = String::new();
 
-        while let Some(line) = lines.next(){
-            //if there is any "\" at the end of the line, read the next line with it
-            if let Some(backslash_pos) = line.find("\\"){
-                current_line.push_str(&line[..backslash_pos].trim_end());
-            }else{
-                current_line.push_str(line);
+        while let Some(line) = lines.next() {
+            current_line.push_str(line.trim_end());
+            if !line.ends_with('\\') {
                 load_line_into_wave_front_obj(&mut obj, &current_line)?;
                 current_line.clear();
+            } else {
+                current_line.pop(); // Remove trailing '\'
             }
         }
 
@@ -27,7 +26,7 @@ impl WavefrontParsable for WavefrontObj {
     }
 }
 
-fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<(),WavefrontError>{
+fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&str)->Result<(),WavefrontError>{
     let (line, comment) = line.split_once("#").unwrap_or((line,""));
     if comment.len() > 0{
         obj.comments.push(comment.to_string());
@@ -35,9 +34,9 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<()
     match line_type(line) {
 //Vertex data
         WaveFrontLineType::GeoVert       => obj.geometric_vertices.push(parse_array_with_default(line, 0.)),
-        WaveFrontLineType::ParamSpaceVert=>obj.parameter_space_vertices.push(parse_array_with_default(line, 1.)),
-        WaveFrontLineType::VertNorm      =>obj.vertex_normals.push(parse_array_with_default(line, 0.)),
-        WaveFrontLineType::TextureVert   =>obj.texture_vertices.push(parse_array_with_default(line, 0.)),
+        WaveFrontLineType::ParamSpaceVert=> obj.parameter_space_vertices.push(parse_array_with_default(line, 1.)),
+        WaveFrontLineType::VertNorm      => obj.vertex_normals.push(parse_array_with_default(line, 0.)),
+        WaveFrontLineType::TextureVert   => obj.texture_vertices.push(parse_array_with_default(line, 0.)),
 
 
 //Free-form curve/surface attributes
@@ -67,12 +66,17 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<()
 
 use std::str::FromStr;
 //TODO test
-fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,default: T,) -> [T; N] {
+pub(crate) fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,default: T,) -> [T; N] {
     let mut result = [default; N];
+    let mut index = 0;
 
-    for (i, word) in line.split_whitespace().take(N).enumerate() {
+    for word in line.split_whitespace() {
+        if index > N{
+            break;
+        }
         if let Ok(val) = word.parse() {
-            result[i] = val;
+            result[index] = val;
+            index += 1;
         }
     }
 
@@ -80,7 +84,7 @@ fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,defaul
 }
 
 //TODO test
-fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
+pub(crate) fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
     let mut result = vec![];
     for word in line.split_whitespace(){
         if let Ok(val) = word.parse(){
@@ -92,16 +96,13 @@ fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
 }
 
 //TODO test
-fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
+pub(crate) fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
     let mut vertex_indices =Vec::with_capacity(line.len() / 2);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 2);
 
     for word in line.split_whitespace(){
-        if word[0..1].contains("l"){
+        if word.starts_with("l"){
             continue;
-        }
-        if word[0..1].contains("#"){
-            break;
         }
         let mut split = word.split("/");
         let vert_index = split.next()
@@ -125,17 +126,14 @@ fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
 }
 
 //TODO test
-fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
+pub(crate) fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
     let mut vertex_indices = Vec::with_capacity(line.len() / 3);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 3);
     let mut normal_vertex_indices = Vec::with_capacity(line.len() / 3);
 
     for word in line.split_whitespace(){
-        if word[0..1].contains("f"){
+        if word.starts_with("f"){
             continue;
-        }
-        if word[0..1].contains("#"){
-            break;
         }
         let mut split = word.split("/");
         let vert_index = split.next()
@@ -162,7 +160,7 @@ fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
 
 
 //TODO test 
-fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
+pub(crate) fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
     let start_index = obj.groups.last()
     .map(|g|g.end_index).unwrap_or(0);
 
@@ -188,7 +186,7 @@ fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
 }
 
 //TODO test
-fn add_name(line :&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
+pub(crate) fn add_name(line :&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
     let split_line = line.split_once(" ");
     if let Some((g,name)) =  split_line{
         if g == "o" && name.len() > 0{
@@ -210,7 +208,7 @@ fn add_name(line :&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
 }
 
 #[derive(Debug, Clone, Copy)]
-enum WaveFrontLineType {
+pub(crate) enum WaveFrontLineType {
     GeoVert,        //v
     TextureVert,    //vt
     VertNorm,       //vn
@@ -248,53 +246,50 @@ enum WaveFrontLineType {
 }
 
 //TODO test
-fn line_type(line :&str)->WaveFrontLineType{
-    if line.len()<2{
-        WaveFrontLineType::Empty
-    }else {
-        match &line[0..2] {
-            "v " => WaveFrontLineType::GeoVert,
-            "vt" => WaveFrontLineType::TextureVert,
-            "vn" => WaveFrontLineType::VertNorm,
-            "vp" => WaveFrontLineType::ParamSpaceVert,
+pub(crate) fn line_type(line :&str)->WaveFrontLineType{
 
-            "cs" => WaveFrontLineType::Cstype,
-            "de" => WaveFrontLineType::Degree,
-            "bm" => WaveFrontLineType::BasisMat,
-            "st" => WaveFrontLineType::StepSize,
-
-            "p " => WaveFrontLineType::Point,
-            "l " => WaveFrontLineType::Line,
-            "f " => WaveFrontLineType::Face,
-            "cu" => if line.len() < 5{
-                    WaveFrontLineType::Unknown
-                }else {
-                    match &line[0..6] {
-                        "curve "=> WaveFrontLineType::Curve,
-                        "curve2"=> WaveFrontLineType::Curve2,
-                        _ => WaveFrontLineType::Unknown,
-                    }
-                }
-            "su" => WaveFrontLineType::Surface,
-
-            "pa" => WaveFrontLineType::ParamValues,
-            "tr" => WaveFrontLineType::OuterTrimLoop,
-            "ho" => WaveFrontLineType::InnerTrimLoop,
-            "sc" => WaveFrontLineType::SpecialCurv,
-            "sp" => WaveFrontLineType::SpecialPoint,
-            "en" => WaveFrontLineType::EndStatement,
-
-            "co" => WaveFrontLineType::Connect,
-
-            "g " => WaveFrontLineType::GroupName,
-            "s " => WaveFrontLineType::SmoothGroup,
-            "mg" => WaveFrontLineType::MergGroupe,
-            "o " => WaveFrontLineType::ObjectName,
-
-            s => match &s[0..1] {
-                "#"=> WaveFrontLineType::Comment,
-                _  => WaveFrontLineType::Unknown,
-            }
-        }
+    if line.is_empty(){
+        return WaveFrontLineType::Empty;
     }
+    if line.starts_with("#") {
+        return WaveFrontLineType::Comment;
+    }
+
+    match line.split_whitespace().next() {
+        Some("v") => WaveFrontLineType::GeoVert,
+        Some("vt") => WaveFrontLineType::TextureVert,
+        Some("vn") => WaveFrontLineType::VertNorm,
+        Some("vp") => WaveFrontLineType::ParamSpaceVert,
+
+        Some("cstype") => WaveFrontLineType::Cstype,
+        Some("deg") => WaveFrontLineType::Degree,
+        Some("bmat") => WaveFrontLineType::BasisMat,
+        Some("step") => WaveFrontLineType::StepSize,
+
+        Some("p") => WaveFrontLineType::Point,
+        Some("l") => WaveFrontLineType::Line,
+        Some("f") => WaveFrontLineType::Face,
+        Some("curv") => WaveFrontLineType::Curve,
+        Some("curv2") => WaveFrontLineType::Curve2,
+        Some("surf") => WaveFrontLineType::Surface,
+
+
+
+        Some("parm") => WaveFrontLineType::ParamValues,
+        Some("trim") => WaveFrontLineType::OuterTrimLoop,
+        Some("hole") => WaveFrontLineType::InnerTrimLoop,
+        Some("scrv") => WaveFrontLineType::SpecialCurv,
+        Some("sp") => WaveFrontLineType::SpecialPoint,
+        Some("end") => WaveFrontLineType::EndStatement,
+
+        Some("con") => WaveFrontLineType::Connect,
+
+        Some("g") => WaveFrontLineType::GroupName,
+        Some("s") => WaveFrontLineType::SmoothGroup,
+        Some("mg") => WaveFrontLineType::MergGroupe,
+        Some("o") => WaveFrontLineType::ObjectName,
+
+        _ => WaveFrontLineType::Unknown,
+    }
+
 }

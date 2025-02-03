@@ -1,3 +1,5 @@
+#![allow(dead_code)] //toremove
+
 use glium::{Surface, VertexBuffer};
 
 use crate::object_traits::{

@@ -9,6 +9,8 @@ pub use translation::Translation;
 mod scale;
 mod translation;
 
+mod test;
+
 pub trait SceneObject {
     fn translate(&mut self, trans: Translation);
     fn set_position(&mut self, pos: Translation);

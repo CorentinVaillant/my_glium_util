@@ -1,9 +1,11 @@
 mod wavefront_parser;
 mod wavefront_struct;
 
+mod test;
+
 use std::{fmt::Display, path::Path};
 
-pub use wavefront_parser::*;
+// pub use wavefront_parser::*;
 pub use wavefront_struct::*;
 
 pub trait WavefrontParsable {

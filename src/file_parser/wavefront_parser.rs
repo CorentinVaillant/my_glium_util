@@ -98,7 +98,6 @@ pub(crate) fn parse_vec<T: FromStr>(line: &str) -> Vec<T> {
     result
 }
 
-//TODO test
 pub(crate) fn parse_linetype(line: &str) -> Result<WavefrontLine, WavefrontError> {
     let mut vertex_indices = Vec::with_capacity(line.len() / 2);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 2);
@@ -250,7 +249,6 @@ pub(crate) enum WaveFrontLineType {
     Comment,
 }
 
-//TODO test
 pub(crate) fn line_type(line: &str) -> WaveFrontLineType {
     if line.is_empty() {
         return WaveFrontLineType::Empty;

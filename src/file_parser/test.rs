@@ -132,3 +132,46 @@ mod test_line_type {
     }
 }
 
+mod test_parse_linetype {
+    use crate::file_parser::wavefront_parser::parse_linetype;
+
+    #[test]
+    fn test_parse_linetype_valid() {
+        let input = "l 1/2 3/4 5/6";
+        let result = parse_linetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 3, 5]);
+        assert_eq!(result.texture_vertex_indices, Some(vec![2, 4, 6]));
+    }
+
+    #[test]
+    fn test_parse_linetype_missing_texture_indices() {
+        let input = "l 1 2 3";
+        let result = parse_linetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 2, 3]);
+        assert_eq!(result.texture_vertex_indices, None);
+    }
+
+    #[test]
+    fn test_parse_linetype_mixed_texture_indices() {
+        let input = "l 1/2 3 4/5";
+        let result = parse_linetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 3, 4]);
+        assert_eq!(result.texture_vertex_indices, None);
+    }
+
+    #[test]
+    fn test_parse_linetype_invalid_input() {
+        let input = "l 1/a 2/3";
+        let result = parse_linetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 2]);
+        assert_eq!(result.texture_vertex_indices, None);
+    }
+
+    #[test]
+    fn test_parse_linetype_empty_input() {
+        let input = "l";
+        let result = parse_linetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![]);
+        assert_eq!(result.texture_vertex_indices, Some(vec![]));
+    }
+}

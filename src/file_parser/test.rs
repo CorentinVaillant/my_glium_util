@@ -233,3 +233,72 @@ mod test_parse_facetype {
         assert_eq!(result.normal_vertex_indices, Some(vec![]));
     }
 }
+
+mod test_add_group_name {
+    use crate::file_parser::wavefront_struct::{WavefrontObj,WavefrontGroup};
+    use crate::file_parser::wavefront_parser::add_group_name;
+
+    #[test]
+    fn test_add_group_name_valid() {
+        let mut obj = WavefrontObj::empty();
+        obj.geometric_vertices.push([1., 2., 3.,1.]);
+        obj.geometric_vertices.push([1., 2., 3.,1.]);
+        obj.geometric_vertices.push([1., 2., 3.,1.]);
+        obj.geometric_vertices.push([1., 2., 3.,1.]);
+        let input = "g my_group";
+        assert!(add_group_name(input, &mut obj).is_ok());
+        assert_eq!(obj.groups.len(), 1);
+        assert_eq!(obj.groups[0].name, "my_group");
+        assert_eq!(obj.groups[0].start_index, 1);
+        assert_eq!(obj.groups[0].end_index, 4);
+    }
+
+    #[test]
+    fn test_add_group_name_with_existing_group() {
+        let mut obj = WavefrontObj::empty();
+        let group = WavefrontGroup { name: "old_group".to_string(), start_index: 1, end_index: 1 };
+        let geometric_vertex1 = [1., 2., 3., 4.];
+        let geometric_vertex2 = [10., 20., 30., 40.];
+
+        obj.groups.push(group);
+        obj.geometric_vertices.push(geometric_vertex1);
+        obj.geometric_vertices.push(geometric_vertex2);
+    
+        let input = "g new_group";
+        assert!(add_group_name(input, &mut obj).is_ok());
+        assert_eq!(obj.groups.len(), 2);
+        assert_eq!(obj.groups[1].name, "new_group");
+        assert_eq!(obj.groups[1].start_index, 2);
+        assert_eq!(obj.groups[1].end_index, 2);
+    }
+
+    #[test]
+    fn test_add_group_name_missing_name() {
+        let mut obj = WavefrontObj::empty();
+        let geometric_vertex = [1., 2., 3.,1.];
+        obj.geometric_vertices.push(geometric_vertex);
+
+        let input = "g";
+        assert!(add_group_name(input, &mut obj).is_err());
+    }
+
+    #[test]
+    fn test_add_group_name_invalid_prefix() {
+        let mut obj = WavefrontObj::empty();
+        let geometric_vertex = [1., 2., 3.,1.];
+        obj.geometric_vertices.push(geometric_vertex);
+
+        let input = "x my_group";
+        assert!(add_group_name(input, &mut obj).is_err());
+    }
+
+    #[test]
+    fn test_add_group_name_empty_input() {
+        let mut obj = WavefrontObj::empty();
+        let geometric_vertex = [1., 2., 3.,1.];
+        obj.geometric_vertices.push(geometric_vertex);
+
+        let input = "";
+        assert!(add_group_name(input, &mut obj).is_err());
+    }
+}

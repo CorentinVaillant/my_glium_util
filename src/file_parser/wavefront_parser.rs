@@ -128,7 +128,6 @@ pub(crate) fn parse_linetype(line: &str) -> Result<WavefrontLine, WavefrontError
     })
 }
 
-//TODO test
 pub(crate) fn parse_facetype(line: &str) -> Result<WavefrontFace, WavefrontError> {
     let mut vertex_indices = Vec::with_capacity(line.len() / 3);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 3);
@@ -167,7 +166,7 @@ pub(crate) fn parse_facetype(line: &str) -> Result<WavefrontFace, WavefrontError
 
 //TODO test
 pub(crate) fn add_group_name(line: &str, obj: &mut WavefrontObj) -> Result<(), WavefrontError> {
-    let start_index = obj.groups.last().map(|g| g.end_index).unwrap_or(0);
+    let start_index = obj.groups.last().map(|g| g.end_index+1).unwrap_or(1);
 
     let end_index = obj.geometric_vertices.len();
 

@@ -1,17 +1,14 @@
-#[cfg(test)]
+#![cfg(test)]
 
-
-pub(super) mod parse_array_with_default_test{
-    use crate::file_parser::wavefront_parser::{parse_array_with_default, parse_vec};
-
-//------parse_array_with_default------
+mod test_parse_array_with_default {
+    use crate::file_parser::wavefront_parser::parse_array_with_default;
 
     #[test]
-    fn test_parse_array_with_valid_input_one(){
+    fn test_parse_array_with_valid_input_one() {
         let input = "v 0.005 0.1 1. 56.";
         let result = parse_array_with_default(input, 1.);
-        assert_eq!(result,[0.005, 0.1, 1., 56.0]);  
-    } 
+        assert_eq!(result, [0.005, 0.1, 1., 56.0]);
+    }
 
     #[test]
     fn test_parse_array_with_valid_input() {
@@ -47,10 +44,11 @@ pub(super) mod parse_array_with_default_test{
         let result: [i32; 5] = parse_array_with_default(input, 0);
         assert_eq!(result, [1, 2, 3, 4, 5]);
     }
+}
+mod test_parse_vec {
+    use crate::file_parser::wavefront_parser::parse_vec;
 
-//-----parse_vec-----
-
-#[test]
+    #[test]
     fn test_parse_vec_with_valid_input() {
         let input = "v 1 2 3 4 5";
         let result: Vec<i32> = parse_vec(input);

@@ -1,5 +1,4 @@
 #[cfg(test)]
-
 #[test]
 pub(super) fn transformation_test() {
     use crate::{object_traits::Rotation, utils::macro_util::chrono};

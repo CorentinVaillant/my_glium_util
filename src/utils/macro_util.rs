@@ -1,4 +1,4 @@
-#![allow(unused_macros,unused_imports)]
+#![allow(unused_macros, unused_imports)]
 
 #[cfg(debug_assertions)]
 macro_rules! debug_println {
@@ -14,8 +14,6 @@ macro_rules! debug_println {
 }
 
 pub(crate) use debug_println;
-
-
 
 macro_rules! chrono {
     ($func:expr,$($arg:tt)*) => {{

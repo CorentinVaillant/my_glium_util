@@ -350,3 +350,56 @@ mod test_parser_utils {
         }
     }
 }
+
+#[cfg(test)]
+mod test_wavefront_parsable {
+
+    use crate::file_parser::{WavefrontObj, WavefrontParsable};
+    use std::fs::{remove_file, File};
+    use std::io::Write;
+
+    #[test]
+    fn test_read_from_obj_valid() {
+        let path = "tests/temps/test_valid.obj";
+        let mut file = File::create(path).unwrap();
+        writeln!(file, "v 1.0 2.0 3.0").unwrap();
+        writeln!(file, "o my_object").unwrap();
+        drop(file);
+        remove_file(path).unwrap();
+
+        let obj = WavefrontObj::read_from_obj(path).unwrap();
+        assert!(obj.object_name.is_some());
+        assert_eq!(obj.object_name.unwrap(), "my_object");
+    }
+
+    #[test]
+    fn test_read_from_obj_multiline_continuation() {
+        let path = "tests/temps/test_multiline.obj";
+        let mut file = File::create(path).unwrap();
+        writeln!(file, "v 1.0 2.0 3.0 \\").unwrap();
+        writeln!(file, "4.0 5.0 6.0").unwrap();
+        drop(file);
+        remove_file(path).unwrap();
+
+        let obj = WavefrontObj::read_from_obj(path).unwrap();
+        assert_eq!(obj.geometric_vertices.len(), 2);
+    }
+
+    #[test]
+    fn test_read_from_obj_empty_file() {
+        let path = "tests/temps/test_empty.obj";
+        File::create(path).unwrap();
+
+        let obj = WavefrontObj::read_from_obj(path).unwrap();
+        assert!(obj.object_name.is_none());
+        assert!(obj.geometric_vertices.is_empty());
+        remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn test_read_from_obj_invalid_file() {
+        let path = "non_existent.obj";
+        let result = WavefrontObj::read_from_obj(path);
+        assert!(result.is_err());
+    }
+}

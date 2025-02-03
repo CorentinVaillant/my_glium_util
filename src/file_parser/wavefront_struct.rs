@@ -2,6 +2,8 @@
 
 pub type NotImpl = ();
 
+pub(crate) use super::wavefront_parser::*;
+
 /*------------------*\
 |     Wavefront      |
 \*------------------*/

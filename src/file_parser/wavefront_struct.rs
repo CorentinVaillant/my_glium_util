@@ -1,8 +1,8 @@
 #![allow(dead_code)]
 
-pub type NotImpl = ();
+use crate::mesh::{mesh::Mesh, vertex::Vertex};
 
-pub(crate) use super::wavefront_parser::*;
+pub type NotImpl = ();
 
 /*------------------*\
 |     Wavefront      |
@@ -84,3 +84,54 @@ impl WavefrontObj {
         }
     }
 }
+/*
+pub(crate) struct WavefrontMesh{
+
+//vertex data
+    pub(crate) geometric_vertices: Vec<[f32; 4]>,
+    pub(crate) texture_vertices: Vec<[f32; 3]>,
+    pub(crate) vertex_normals: Vec<[f32; 3]>,
+    pub(crate) parameter_space_vertices: Vec<[f32; 3]>, // ! don't know if kept
+
+//Elements
+    pub(crate) points: Vec<Vec<i32>>,
+    pub(crate) line: Vec<WavefrontMeshLine>,
+    pub(crate) face: Vec<WavefrontMeshFace>,
+
+//Grouping
+    pub(crate) groups: Vec<WavefrontGroup>,
+    pub(crate) smoothing_group: NotImpl,
+    pub(crate) merging_group: NotImpl,
+    pub(crate) object_name: Option<String>,
+
+}
+
+
+#[derive(Debug, Clone)]
+pub(crate) struct WavefrontMeshLine {
+    pub(crate) vertex_indices: Vec<usize>,
+    pub(crate) texture_vertex_indices: Option<Vec<usize>>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct WavefrontMeshFace {
+    pub(crate) vertex_indices: Vec<usize>,
+    pub(crate) texture_vertex_indices: Option<Vec<usize>>,
+    pub(crate) normal_vertex_indices: Option<Vec<usize>>,
+}
+
+
+impl TryFrom<WavefrontLine> for WavefrontMeshLine{
+    type Error = ();
+
+    fn try_from(value: WavefrontLine) -> Result<Self, Self::Error> {
+        let vertex_indices value.vertex_indices.iter()
+        .map(|n|{n.try_into()}).collect();
+
+        Ok(Self { 
+            vertex_indices, 
+            texture_vertex_indices: () 
+        })
+    }
+}
+*/

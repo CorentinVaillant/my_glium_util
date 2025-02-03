@@ -14,7 +14,10 @@ pub struct Mesh {
     pub(crate) name: Option<String>,
 
     pub(crate) vertecies: Vec<Vertex>,
-    pub(crate) indices: Option<Vec<u32>>,
+    pub(crate) vert_indices: Option<Vec<u32>>,
+    pub(crate) norm_indices: Option<Vec<u32>>,
+    pub(crate) text_indices: Option<Vec<u32>>,
+
     pub(crate) _texture: Option<glium::texture::Texture2d>, //? idk
 
     pub(crate) position: Translation,
@@ -112,7 +115,9 @@ impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
         Self {
             name: None,
             vertecies,
-            indices: None,
+            vert_indices: None,
+            norm_indices: None,
+            text_indices: None,
             _texture: None,
 
             position: Translation::zero(),
@@ -131,7 +136,10 @@ impl Mesh {
         Self {
             name: None,
             vertecies,
-            indices: Some(indices),
+            vert_indices: Some(indices.clone()),
+            norm_indices: Some(indices.clone()),
+            text_indices: Some(indices),
+
             _texture: None,
             position: Translation::zero(),
             scale: Scale::zero(),
@@ -159,7 +167,7 @@ impl Mesh {
         &self,
         facade: &F,
     ) -> Result<glium::index::IndexBuffer<u32>, glium::index::BufferCreationError> {
-        if let Some(ref indice) = self.indices {
+        if let Some(ref indice) = self.vert_indices {
             glium::index::IndexBuffer::new(
                 facade,
                 glium::index::PrimitiveType::TrianglesList,

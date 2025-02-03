@@ -365,24 +365,26 @@ mod test_wavefront_parsable {
         writeln!(file, "v 1.0 2.0 3.0").unwrap();
         writeln!(file, "o my_object").unwrap();
         drop(file);
-        remove_file(path).unwrap();
-
+        
         let obj = WavefrontObj::read_from_obj(path).unwrap();
         assert!(obj.object_name.is_some());
         assert_eq!(obj.object_name.unwrap(), "my_object");
+        let _ = remove_file(path);
     }
 
     #[test]
     fn test_read_from_obj_multiline_continuation() {
         let path = "tests/temps/test_multiline.obj";
         let mut file = File::create(path).unwrap();
-        writeln!(file, "v 1.0 2.0 3.0 \\").unwrap();
-        writeln!(file, "4.0 5.0 6.0").unwrap();
+        writeln!(file, "v 1.0 2.0 \\").unwrap();
+        writeln!(file, "4.0 1.0").unwrap();
         drop(file);
-        remove_file(path).unwrap();
-
+        
+        
         let obj = WavefrontObj::read_from_obj(path).unwrap();
-        assert_eq!(obj.geometric_vertices.len(), 2);
+        assert_eq!(obj.geometric_vertices.len(), 1);
+        assert_eq!(obj.geometric_vertices.get(0), Some(&[1.,2.,4.,1.]));
+        let _ = remove_file(path);
     }
 
     #[test]
@@ -393,7 +395,7 @@ mod test_wavefront_parsable {
         let obj = WavefrontObj::read_from_obj(path).unwrap();
         assert!(obj.object_name.is_none());
         assert!(obj.geometric_vertices.is_empty());
-        remove_file(path).unwrap();
+        let _ = remove_file(path);
     }
 
     #[test]

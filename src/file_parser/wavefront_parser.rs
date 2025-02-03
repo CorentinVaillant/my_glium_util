@@ -6,17 +6,17 @@ use super::{
 
 impl WavefrontParsable for WavefrontObj {
     fn read_from_obj<P: AsRef<Path>>(path: P) -> Result<WavefrontObj, WavefrontError> {
-        let data = read_to_string(path).map_err(|e| WavefrontError::IOError(e))?;
+        let data = read_to_string(path).map_err(WavefrontError::IOError)?;
 
         let mut obj = WavefrontObj::empty();
 
-        let mut lines = data.lines();
+        let lines = data.lines();
         let mut current_line = String::new();
 
-        while let Some(line) = lines.next() {
+        for line in lines {
             current_line.push_str(line.trim_end());
             if !line.ends_with('\\') {
-                load_line_into_wave_front_obj(&mut obj, &current_line)?;
+                load_line_into_wavefront_obj(&mut obj, &current_line)?;
                 current_line.clear();
             } else {
                 current_line.pop(); // Remove trailing '\'
@@ -27,9 +27,9 @@ impl WavefrontParsable for WavefrontObj {
     }
 }
 
-fn load_line_into_wave_front_obj(obj: &mut WavefrontObj, line: &str) -> Result<(), WavefrontError> {
+fn load_line_into_wavefront_obj(obj: &mut WavefrontObj, line: &str) -> Result<(), WavefrontError> {
     let (line, comment) = line.split_once("#").unwrap_or((line, ""));
-    if comment.len() > 0 {
+    if !comment.is_empty() {
         obj.comments.push(comment.to_string());
     }
     match line_type(line) {
@@ -171,7 +171,7 @@ pub(crate) fn add_group_name(line: &str, obj: &mut WavefrontObj) -> Result<(), W
 
     let split_line = line.split_once(" ");
     if let Some((g, name)) = split_line {
-        if g == "g" && name.len() > 0 {
+        if g == "g" && !name.is_empty() {
             obj.groups.push(WavefrontGroup {
                 name: name.to_string(),
                 start_index,
@@ -187,11 +187,10 @@ pub(crate) fn add_group_name(line: &str, obj: &mut WavefrontObj) -> Result<(), W
     }
 }
 
-//TODO test
 pub(crate) fn add_name(line: &str, obj: &mut WavefrontObj) -> Result<(), WavefrontError> {
     let split_line = line.split_once(" ");
     if let Some((g, name)) = split_line {
-        if g == "o" && name.len() > 0 {
+        if g == "o" && !name.is_empty() {
             if let Some(prev_name) = &obj.object_name {
                 Err(WavefrontError::MultipleNamesDefined(
                     prev_name.clone(),

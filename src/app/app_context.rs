@@ -17,22 +17,16 @@ pub trait ApplicationContext {
         _device_id: winit::event::DeviceId,
         _event: winit::event::DeviceEvent,
     ) {
-        ()
     }
 
-    fn handle_user_event(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-        ()
-    }
+    fn handle_user_event(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {}
 
     fn handle_event(
         &mut self,
         _event_loop: &winit::event_loop::ActiveEventLoop,
         _cause: winit::event::StartCause,
     ) {
-        ()
     }
 
-    fn on_exiting(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {
-        ()
-    }
+    fn on_exiting(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop) {}
 }

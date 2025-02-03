@@ -193,12 +193,12 @@ impl Renderable for Mesh {
     ) -> Result<(), Self::RenderError> {
         let mut vertex_buffer: VertexBuffer<Vertex> =
             glium::VertexBuffer::empty(facade, self.vertecies_number())
-                .map_err(|e| MeshRenderError::VertexBufferCreationError(e))?;
+                .map_err(MeshRenderError::VertexBufferCreationError)?;
         self.load_into_vertex_buffer(&mut vertex_buffer);
 
         let index_buffer = self
             .to_index_buffer(facade)
-            .map_err(|e| MeshRenderError::IndiceBufferCreationError(e))?;
+            .map_err(MeshRenderError::IndiceBufferCreationError)?;
 
         target
             .draw(
@@ -208,6 +208,6 @@ impl Renderable for Mesh {
                 uniforms,
                 draw_parameters,
             )
-            .map_err(|e| MeshRenderError::DrawError(e))
+            .map_err(MeshRenderError::DrawError)
     }
 }

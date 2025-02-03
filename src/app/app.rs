@@ -53,14 +53,14 @@ impl<T: ApplicationContext> State<T> {
     pub fn run() -> Result<(), StateError> {
         let event_loop = glium::winit::event_loop::EventLoop::builder()
             .build()
-            .map_err(|e| StateError::EventLoopError(e))?;
+            .map_err(StateError::EventLoopError)?;
         let mut app = App::<T> {
             state: None,
             app_name: "My App", //TODO
         };
 
         let result = event_loop.run_app(&mut app);
-        result.map_err(|e| StateError::EventLoopError(e))
+        result.map_err(StateError::EventLoopError)
     }
 }
 

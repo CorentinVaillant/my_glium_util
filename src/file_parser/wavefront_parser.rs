@@ -54,7 +54,7 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<()
         WaveFrontLineType::GroupName  => add_group_name(line,obj)?,
         WaveFrontLineType::SmoothGroup |
         WaveFrontLineType::MergGroupe => (),
-        // WaveFrontLineType::ObjectName =>
+        WaveFrontLineType::ObjectName => add_name(line, obj)?,
         _ => ()
     };
     Ok(())
@@ -179,6 +179,27 @@ fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
     }else {
         Err(WavefrontError::InvalidGroupeNameData(line.to_string()))
     }
+
+}
+
+fn add_name(line :&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
+    let split_line = line.split_once(" ");
+    if let Some((g,name)) =  split_line{
+        if g == "o" && name.len() > 0{
+            
+            if let Some(prev_name) = &obj.object_name {
+                Err(WavefrontError::MultipleNamesDefined(prev_name.clone(), name.to_string()))
+            }else{
+                obj.object_name = Some(name.to_string());
+                Ok(())
+            }
+        }else {
+            Err(WavefrontError::InvalidNameData(line.to_string()))
+        }
+    }else {
+        Err(WavefrontError::InvalidNameData(line.to_string()))
+    } 
+
 
 }
 

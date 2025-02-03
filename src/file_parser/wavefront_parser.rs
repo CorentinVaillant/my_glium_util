@@ -164,9 +164,8 @@ pub(crate) fn parse_facetype(line: &str) -> Result<WavefrontFace, WavefrontError
     })
 }
 
-//TODO test
 pub(crate) fn add_group_name(line: &str, obj: &mut WavefrontObj) -> Result<(), WavefrontError> {
-    let start_index = obj.groups.last().map(|g| g.end_index+1).unwrap_or(1);
+    let start_index = obj.groups.last().map(|g| g.end_index + 1).unwrap_or(1);
 
     let end_index = obj.geometric_vertices.len();
 
@@ -210,7 +209,7 @@ pub(crate) fn add_name(line: &str, obj: &mut WavefrontObj) -> Result<(), Wavefro
     }
 }
 
-#[derive(Debug, Clone, Copy,PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum WaveFrontLineType {
     GeoVert,        //v
     TextureVert,    //vt

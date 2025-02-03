@@ -175,3 +175,61 @@ mod test_parse_linetype {
         assert_eq!(result.texture_vertex_indices, Some(vec![]));
     }
 }
+
+mod test_parse_facetype {
+    use crate::file_parser::wavefront_parser::parse_facetype;
+
+    #[test]
+    fn test_parse_facetype_valid() {
+        let input = "f 1/2/3 4/5/6 7/8/9";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 4, 7]);
+        assert_eq!(result.texture_vertex_indices, Some(vec![2, 5, 8]));
+        assert_eq!(result.normal_vertex_indices, Some(vec![3, 6, 9]));
+    }
+
+    #[test]
+    fn test_parse_facetype_missing_texture_indices() {
+        let input = "f 1//3 4//6 7//9";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 4, 7]);
+        assert_eq!(result.texture_vertex_indices, None);
+        assert_eq!(result.normal_vertex_indices, Some(vec![3, 6, 9]));
+    }
+
+    #[test]
+    fn test_parse_facetype_missing_normal_indices() {
+        let input = "f 1/2 4/5 7/8";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 4, 7]);
+        assert_eq!(result.texture_vertex_indices, Some(vec![2, 5, 8]));
+        assert_eq!(result.normal_vertex_indices, None);
+    }
+
+    #[test]
+    fn test_parse_facetype_mixed_indices() {
+        let input = "f 1/2/3 4//6 7/8";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1, 4, 7]);
+        assert_eq!(result.texture_vertex_indices, None);
+        assert_eq!(result.normal_vertex_indices, None);
+    }
+
+    #[test]
+    fn test_parse_facetype_invalid_input() {
+        let input = "f 1/a/3 4/5/6";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![1,4]);
+        assert_eq!(result.texture_vertex_indices, None);
+        assert_eq!(result.normal_vertex_indices, Some(vec![3,6]));
+    }
+
+    #[test]
+    fn test_parse_facetype_empty_input() {
+        let input = "f";
+        let result = parse_facetype(input).unwrap();
+        assert_eq!(result.vertex_indices, vec![]);
+        assert_eq!(result.texture_vertex_indices, Some(vec![]));
+        assert_eq!(result.normal_vertex_indices, Some(vec![]));
+    }
+}

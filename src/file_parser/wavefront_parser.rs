@@ -28,6 +28,10 @@ impl WavefrontParsable for WavefrontObj {
 }
 
 fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<(),WavefrontError>{
+    let (line, comment) = line.split_once("#").unwrap_or((line,""));
+    if comment.len() > 0{
+        obj.comments.push(comment.to_string());
+    }
     match line_type(line) {
 //Vertex data
         WaveFrontLineType::GeoVert       => obj.geometric_vertices.push(parse_array_with_default(line, 0.)),
@@ -55,6 +59,7 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<()
         WaveFrontLineType::SmoothGroup |
         WaveFrontLineType::MergGroupe => (),
         WaveFrontLineType::ObjectName => add_name(line, obj)?,
+
         _ => ()
     };
     Ok(())
@@ -182,6 +187,7 @@ fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
 
 }
 
+//TODO test
 fn add_name(line :&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
     let split_line = line.split_once(" ");
     if let Some((g,name)) =  split_line{
@@ -241,6 +247,7 @@ enum WaveFrontLineType {
     Comment,
 }
 
+//TODO test
 fn line_type(line :&str)->WaveFrontLineType{
     if line.len()<2{
         WaveFrontLineType::Empty

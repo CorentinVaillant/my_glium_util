@@ -10,7 +10,7 @@ pub struct WavefrontObj{
     
 //vertex data
     pub(crate) geometric_vertices :      Vec<[f32;4]>,
-    pub(crate) texture_vertices :         Vec<[f32;3]>,
+    pub(crate) texture_vertices :        Vec<[f32;3]>,
     pub(crate) vertex_normals :          Vec<[f32;3]>,
     pub(crate) parameter_space_vertices :Vec<[f32;3]>,
 

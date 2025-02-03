@@ -212,7 +212,7 @@ pub(crate) fn add_name(line: &str, obj: &mut WavefrontObj) -> Result<(), Wavefro
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy,PartialEq, Eq)]
 pub(crate) enum WaveFrontLineType {
     GeoVert,        //v
     TextureVert,    //vt

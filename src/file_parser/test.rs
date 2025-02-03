@@ -76,3 +76,59 @@ mod test_parse_vec {
         assert_eq!(result, vec![3, 4, 5]);
     }
 }
+
+mod test_line_type {
+
+    use crate::file_parser::wavefront_parser::{line_type,WaveFrontLineType};
+
+    #[test]
+    fn test_line_type_empty() {
+        assert_eq!(line_type(""), WaveFrontLineType::Empty);
+    }
+
+    #[test]
+    fn test_line_type_comment() {
+        assert_eq!(line_type("# This is a comment"), WaveFrontLineType::Comment);
+    }
+
+    #[test]
+    fn test_line_type_geo_vert() {
+        assert_eq!(line_type("v 1.0 2.0 3.0"), WaveFrontLineType::GeoVert);
+    }
+
+    #[test]
+    fn test_line_type_texture_vert() {
+        assert_eq!(line_type("vt 0.1 0.2"), WaveFrontLineType::TextureVert);
+    }
+
+    #[test]
+    fn test_line_type_vert_norm() {
+        assert_eq!(line_type("vn 1.0 0.0 0.0"), WaveFrontLineType::VertNorm);
+    }
+
+    #[test]
+    fn test_line_type_param_space_vert() {
+        assert_eq!(line_type("vp 1.0 2.0"), WaveFrontLineType::ParamSpaceVert);
+    }
+
+    #[test]
+    fn test_line_type_face() {
+        assert_eq!(line_type("f 1 2 3"), WaveFrontLineType::Face);
+    }
+
+    #[test]
+    fn test_line_type_group_name() {
+        assert_eq!(line_type("g my_group"), WaveFrontLineType::GroupName);
+    }
+
+    #[test]
+    fn test_line_type_object_name() {
+        assert_eq!(line_type("o my_object"), WaveFrontLineType::ObjectName);
+    }
+
+    #[test]
+    fn test_line_type_unknown() {
+        assert_eq!(line_type("xyz 1 2 3"), WaveFrontLineType::Unknown);
+    }
+}
+

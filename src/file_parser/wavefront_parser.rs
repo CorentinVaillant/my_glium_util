@@ -65,13 +65,12 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&str)->Result<(),Wa
 }
 
 use std::str::FromStr;
-//TODO test
 pub(crate) fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,default: T,) -> [T; N] {
     let mut result = [default; N];
     let mut index = 0;
 
     for word in line.split_whitespace() {
-        if index > N{
+        if index >= N{
             break;
         }
         if let Ok(val) = word.parse() {
@@ -79,7 +78,6 @@ pub(crate) fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: 
             index += 1;
         }
     }
-
     result
 }
 

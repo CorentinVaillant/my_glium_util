@@ -2,7 +2,9 @@
 
 
 pub(super) mod parse_array_with_default_test{
-    use crate::file_parser::wavefront_parser::parse_array_with_default;
+    use crate::file_parser::wavefront_parser::{parse_array_with_default, parse_vec};
+
+//------parse_array_with_default------
 
     #[test]
     fn test_parse_array_with_valid_input_one(){
@@ -44,5 +46,35 @@ pub(super) mod parse_array_with_default_test{
         let input = "vt 1 2 3 4 5 6 7 8 9";
         let result: [i32; 5] = parse_array_with_default(input, 0);
         assert_eq!(result, [1, 2, 3, 4, 5]);
+    }
+
+//-----parse_vec-----
+
+#[test]
+    fn test_parse_vec_with_valid_input() {
+        let input = "v 1 2 3 4 5";
+        let result: Vec<i32> = parse_vec(input);
+        assert_eq!(result, vec![1, 2, 3, 4, 5]);
+    }
+
+    #[test]
+    fn test_parse_vec_with_empty_input() {
+        let input = "vt ";
+        let result: Vec<i32> = parse_vec(input);
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_parse_vec_with_non_numeric_values() {
+        let input = "t 10 a 20";
+        let result: Vec<i32> = parse_vec(input);
+        assert_eq!(result, vec![10, 20]);
+    }
+
+    #[test]
+    fn test_parse_vec_with_mixed_spacing() {
+        let input = "vt  3   4 5 ";
+        let result: Vec<i32> = parse_vec(input);
+        assert_eq!(result, vec![3, 4, 5]);
     }
 }

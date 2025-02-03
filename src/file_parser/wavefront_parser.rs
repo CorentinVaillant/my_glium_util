@@ -81,7 +81,6 @@ pub(crate) fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: 
     result
 }
 
-//TODO test
 pub(crate) fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
     let mut result = vec![];
     for word in line.split_whitespace(){

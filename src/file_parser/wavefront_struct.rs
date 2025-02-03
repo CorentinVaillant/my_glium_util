@@ -30,7 +30,7 @@ pub struct WavefrontObj{
     //not implemented
 
 //Grouping
-    pub(crate)group_name:    Vec<WavefrontGroup>,
+    pub(crate)groups:    Vec<WavefrontGroup>,
     pub(crate)smoothing_group:NotImpl,
     pub(crate)merging_group:  NotImpl,
     pub(crate)object_name:    Option<String>,
@@ -57,8 +57,8 @@ pub(crate) struct WavefrontFace{
 #[derive(Debug,Clone)]
 pub(crate) struct WavefrontGroup{
     pub(crate)name : String,
-    pub(crate)start_index : i32,
-    pub(crate)end_index : i32,
+    pub(crate)start_index : usize,
+    pub(crate)end_index : usize,
 }
 
 impl WavefrontObj{
@@ -74,7 +74,7 @@ impl WavefrontObj{
             curv: (), 
             curv2: (), 
             surface: (), 
-            group_name: vec![], 
+            groups: vec![], 
             object_name: None, 
             comments: vec![],
             smoothing_group: (),

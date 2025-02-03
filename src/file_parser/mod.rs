@@ -17,6 +17,7 @@ pub enum WavefrontError {
     IOError(std::io::Error),
     InvalidLineData(String),
     InvalidFaceData(String),
+    InvalidGroupeNameData(String),
 }
 
 impl Display for WavefrontError {
@@ -25,6 +26,7 @@ impl Display for WavefrontError {
             WavefrontError::IOError(e) => write!(f,"IO error :{}",e),
             WavefrontError::InvalidLineData(line) => write!(f, "invalid line data has been found :{}",line),
             WavefrontError::InvalidFaceData(line) => write!(f, "invalid face data has been found :{}",line),
+            WavefrontError::InvalidGroupeNameData(line) => write!(f, "invalid group name data has been found :{}",line),
         }
     }
 }

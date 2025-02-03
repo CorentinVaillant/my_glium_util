@@ -1,6 +1,6 @@
 use std::{fs::read_to_string, path::Path};
 
-use super::{WavefrontError, WavefrontFace, WavefrontLine, WavefrontObj, WavefrontParsable};
+use super::{WavefrontError, WavefrontFace, WavefrontGroup, WavefrontLine, WavefrontObj, WavefrontParsable};
 
 impl WavefrontParsable for WavefrontObj {
     fn read_from_obj<P : AsRef<Path> >(path: P) -> Result<WavefrontObj, WavefrontError> {
@@ -41,15 +41,27 @@ fn load_line_into_wave_front_obj(obj:&mut WavefrontObj, line:&String)->Result<()
 
 //Elements
         WaveFrontLineType::Point => obj.points.push(parse_vec(line)),
-        WaveFrontLineType::Line => obj.line.push(parse_linetype(line)?),
-        WaveFrontLineType::Face => obj.face.push(parse_facetype(line)?), //TODO
+        WaveFrontLineType::Line  => obj.line.push(parse_linetype(line)?),
+        WaveFrontLineType::Face  => obj.face.push(parse_facetype(line)?), 
+        WaveFrontLineType::Curve |
+        WaveFrontLineType::Curve2|
+        WaveFrontLineType::Surface => (),
 
+//Free-form curve/surface body statements
+    //not implemented
+
+//Grouping
+        WaveFrontLineType::GroupName  => add_group_name(line,obj)?,
+        WaveFrontLineType::SmoothGroup |
+        WaveFrontLineType::MergGroupe => (),
+        // WaveFrontLineType::ObjectName =>
         _ => ()
     };
     Ok(())
 }
 
 use std::str::FromStr;
+//TODO test
 fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,default: T,) -> [T; N] {
     let mut result = [default; N];
 
@@ -62,6 +74,7 @@ fn parse_array_with_default<T: Copy + FromStr, const N: usize>(line: &str,defaul
     result
 }
 
+//TODO test
 fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
     let mut result = vec![];
     for word in line.split_whitespace(){
@@ -73,12 +86,13 @@ fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
     result
 }
 
+//TODO test
 fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
     let mut vertex_indices =Vec::with_capacity(line.len() / 2);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 2);
 
     for word in line.split_whitespace(){
-        if word[0..1].contains("f"){
+        if word[0..1].contains("l"){
             continue;
         }
         if word[0..1].contains("#"){
@@ -105,7 +119,7 @@ fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
 
 }
 
-//TODO
+//TODO test
 fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
     let mut vertex_indices = Vec::with_capacity(line.len() / 3);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 3);
@@ -122,11 +136,50 @@ fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
         let vert_index = split.next()
         .ok_or(WavefrontError::InvalidLineData(line.to_string()))?
         .parse().map_err(|_|WavefrontError::InvalidLineData(line.to_string()))?;
+
+        vertex_indices.push(vert_index);
+
+        let text_vert_index = split.next()
+        .and_then(|s| s.parse().ok());
+
+        texture_vertex_indices.push(text_vert_index);
+
+        let norm_vert_index = split.next()
+        .and_then(|s| s.parse().ok());
+
+        normal_vertex_indices.push(norm_vert_index);
     }
 
     let texture_vertex_indices = texture_vertex_indices.into_iter().collect();
     let normal_vertex_indices = normal_vertex_indices.into_iter().collect();
     Ok(WavefrontFace{vertex_indices,texture_vertex_indices,normal_vertex_indices})
+}
+
+
+//TODO test 
+fn add_group_name(line:&str, obj:&mut WavefrontObj)->Result<(),WavefrontError>{
+    let start_index = obj.groups.last()
+    .map(|g|g.end_index).unwrap_or(0);
+
+    let end_index = obj.geometric_vertices.len();
+
+    let split_line = line.split_once(" ");
+    if let Some((g,name)) =  split_line{
+        if g == "g" && name.len() > 0{
+            obj.groups.push(WavefrontGroup{
+                name : name.to_string(),
+                start_index,
+                end_index
+            });
+            
+            Ok(())
+        }else {
+            Err(WavefrontError::InvalidGroupeNameData(line.to_string()))
+        }
+    }else {
+        Err(WavefrontError::InvalidGroupeNameData(line.to_string()))
+    }
+
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -207,7 +260,7 @@ fn line_type(line :&str)->WaveFrontLineType{
 
             "g " => WaveFrontLineType::GroupName,
             "s " => WaveFrontLineType::SmoothGroup,
-            "mg" => WaveFrontLineType::SmoothGroup,
+            "mg" => WaveFrontLineType::MergGroupe,
             "o " => WaveFrontLineType::ObjectName,
 
             s => match &s[0..1] {

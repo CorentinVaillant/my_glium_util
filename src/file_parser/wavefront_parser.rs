@@ -73,16 +73,21 @@ fn parse_vec<T :FromStr >(line :&str)->Vec<T>{
     result
 }
 
-//TODO not good will fail, and return Err each time, 
 fn parse_linetype(line :&str) -> Result<WavefrontLine,WavefrontError>{
     let mut vertex_indices =Vec::with_capacity(line.len() / 2);
     let mut texture_vertex_indices = Vec::with_capacity(line.len() / 2);
 
     for word in line.split_whitespace(){
+        if word[0..1].contains("f"){
+            continue;
+        }
+        if word[0..1].contains("#"){
+            break;
+        }
         let mut split = word.split("/");
         let vert_index = split.next()
           .ok_or(WavefrontError::InvalidLineData(line.to_string()))?
-          .parse().map_err(|_|WavefrontError::InvalidLineData(line.to_string()))?; // ! This fail
+          .parse().map_err(|_|WavefrontError::InvalidLineData(line.to_string()))?;
 
         vertex_indices.push(vert_index);
 
@@ -107,9 +112,16 @@ fn parse_facetype(line :&str) -> Result<WavefrontFace,WavefrontError>{
     let mut normal_vertex_indices = Vec::with_capacity(line.len() / 3);
 
     for word in line.split_whitespace(){
+        if word[0..1].contains("f"){
+            continue;
+        }
+        if word[0..1].contains("#"){
+            break;
+        }
         let mut split = word.split("/");
         let vert_index = split.next()
-          .ok_or(err)
+        .ok_or(WavefrontError::InvalidLineData(line.to_string()))?
+        .parse().map_err(|_|WavefrontError::InvalidLineData(line.to_string()))?;
     }
 
     let texture_vertex_indices = texture_vertex_indices.into_iter().collect();

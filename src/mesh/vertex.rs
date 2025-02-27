@@ -6,7 +6,7 @@ use crate::{
     utils::types_util::{Arr3F32, Arr4F32, QuatF32, Vec3},
 };
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy,PartialEq)]
 pub struct Vertex {
     pub(crate) position: Arr4F32,
     pub(crate) normal: Arr3F32,
@@ -22,6 +22,13 @@ impl From<Arr4F32> for Vertex {
             normal: [0.; 3],
             texture: [0.; 3],
         }
+    }
+}
+
+impl From<Arr3F32> for Vertex{
+    fn from(value: Arr3F32) -> Self {
+       let [x,y,z] = value;
+       [x,y,z,1.].into()
     }
 }
 
@@ -94,5 +101,30 @@ impl Vertex {
                     ))
                     * rotation.f_mult_inverse(),
             );
+    }
+}
+
+
+//Math
+
+impl Vertex{
+    ///returns the distance between two vertices in the 3d space
+    pub fn distance(&self,other:&Self)->f32{
+        let p1 = &self.position[0..3];
+        let p2 = &other.position[0..3];
+
+        f32::sqrt(
+            p1.iter().zip(p2.iter()).map(|(x1,x2)|(x1-x2).powi(2)).sum()
+        )
+    }
+
+    ///returns the distance between two vertices in the 4d space
+    pub fn w_distance(&self,other:&Self)->f32{
+        let p1 = &self.position;
+        let p2 = &other.position;
+
+        f32::sqrt(
+            p1.iter().zip(p2.iter()).map(|(x1,x2)|(x1-x2).powi(2)).sum()
+        )
     }
 }

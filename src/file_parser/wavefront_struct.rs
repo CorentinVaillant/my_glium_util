@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 
-use crate::mesh::{mesh::Mesh, vertex::Vertex};
-
 pub type NotImpl = ();
 
 /*------------------*\
@@ -128,9 +126,9 @@ impl TryFrom<WavefrontLine> for WavefrontMeshLine{
         let vertex_indices value.vertex_indices.iter()
         .map(|n|{n.try_into()}).collect();
 
-        Ok(Self { 
-            vertex_indices, 
-            texture_vertex_indices: () 
+        Ok(Self {
+            vertex_indices,
+            texture_vertex_indices: ()
         })
     }
 }

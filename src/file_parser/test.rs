@@ -365,7 +365,7 @@ mod test_wavefront_parsable {
         writeln!(file, "v 1.0 2.0 3.0").unwrap();
         writeln!(file, "o my_object").unwrap();
         drop(file);
-        
+
         let obj = WavefrontObj::read_from_obj(path).unwrap();
         assert!(obj.object_name.is_some());
         assert_eq!(obj.object_name.unwrap(), "my_object");
@@ -379,11 +379,10 @@ mod test_wavefront_parsable {
         writeln!(file, "v 1.0 2.0 \\").unwrap();
         writeln!(file, "4.0 1.0").unwrap();
         drop(file);
-        
-        
+
         let obj = WavefrontObj::read_from_obj(path).unwrap();
         assert_eq!(obj.geometric_vertices.len(), 1);
-        assert_eq!(obj.geometric_vertices.get(0), Some(&[1.,2.,4.,1.]));
+        assert_eq!(obj.geometric_vertices.get(0), Some(&[1., 2., 4., 1.]));
         let _ = remove_file(path);
     }
 

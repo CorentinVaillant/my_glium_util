@@ -3,11 +3,13 @@ pub mod half_edge;
 pub mod polygon;
 pub mod vertex;
 
+mod mesh_inners;
 #[cfg(test)]
 mod test;
 
 use glium::{Surface, VertexBuffer};
 use vertex::Vertex;
+
 
 use crate::object_traits::{
     ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject,

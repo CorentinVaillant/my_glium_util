@@ -5,7 +5,7 @@ use my_rust_matrix_lib::my_matrix_lib::prelude::VectorSpace;
 
 use crate::utils::types_util::{Arr3F32, Arr4F32, Vec3, Vec4};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug,PartialEq, Clone, Copy)]
 pub struct Translation {
     inner: Vec4,
 }

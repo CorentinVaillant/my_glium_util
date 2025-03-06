@@ -4,7 +4,7 @@ use my_rust_matrix_lib::my_matrix_lib::prelude::{EuclidianSpace, Field, Ring};
 
 use crate::utils::types_util::{Mat3, Mat4, QuatF32};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug,PartialEq, Clone, Copy)]
 pub struct Rotation {
     value: QuatF32,
 }

@@ -2,7 +2,7 @@ use std::ops::{Add, AddAssign, Index, Mul, MulAssign, Sub, SubAssign};
 
 use crate::utils::types_util::{Arr3F32, Vec3};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug,PartialEq, Clone, Copy)]
 pub struct Scale {
     inner: Vec3,
 }

@@ -1,18 +1,20 @@
 #![allow(dead_code)] //toremove
-pub mod half_edge;
+pub mod mesh_inners;
 pub mod polygon;
 pub mod vertex;
 
-mod mesh_inners;
 #[cfg(test)]
 mod test;
 
-use glium::{Surface, VertexBuffer};
+
+
+use std::rc::Rc;
+
+use mesh_inners::{InnerMeshRef, MeshVertex};
 use vertex::Vertex;
 
-
 use crate::object_traits::{
-    ApplicableSceneObject, GetableSceneObject, Renderable, Rotation, Scale, SceneObject,
+    GetableSceneObject, Rotation, Scale, SceneObject,
     Translation,
 };
 
@@ -20,16 +22,23 @@ use crate::object_traits::{
 pub struct Mesh {
     pub(crate) name: Option<String>,
 
-    pub(crate) vertecies: Vec<Vertex>,
-    pub(crate) vert_indices: Option<Vec<u32>>,
-    pub(crate) norm_indices: Option<Vec<u32>>,
-    pub(crate) text_indices: Option<Vec<u32>>,
-
-    pub(crate) _texture: Option<glium::texture::Texture2d>, //? idk
+    pub(crate) inner_mesh :InnerMeshRef,
 
     pub(crate) position: Translation,
     pub(crate) scale: Scale,
     pub(crate) rotation: Rotation,
+}
+
+//? https://github.com/D-BookeR/Synthese-d-images-avec-OpenGL
+impl Mesh {
+    fn add_vertex(&mut self, vertex:Vertex)->Result<(),std::cell::BorrowMutError>{
+        self.push_vertex(MeshVertex::new(Some(self.inner_mesh.clone()), vertex))
+    }
+
+    fn push_vertex(&mut self,vertex:MeshVertex)->Result<(),std::cell::BorrowMutError>{
+        self.inner_mesh.try_borrow_mut()?.vertex_list.push(vertex);
+        Ok(())
+    }
 }
 
 impl SceneObject for Mesh {
@@ -81,110 +90,110 @@ impl GetableSceneObject for Mesh {
     }
 }
 
-impl ApplicableSceneObject for Mesh {
-    fn apply_position(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.translate(self.position);
-        }
-        self.position = Translation::zero();
-    }
+// impl ApplicableSceneObject for Mesh {
+//     fn apply_position(&mut self) {
+//         for vert in self.vertecies.iter_mut() {
+//             vert.translate(self.position);
+//         }
+//         self.position = Translation::zero();
+//     }
 
-    fn apply_scale(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.scale(self.scale);
-        }
-        self.scale = [1.; 3].into();
-    }
+//     fn apply_scale(&mut self) {
+//         for vert in self.vertecies.iter_mut() {
+//             vert.scale(self.scale);
+//         }
+//         self.scale = [1.; 3].into();
+//     }
 
-    fn apply_rotation(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.rotate(self.rotation.into());
-        }
-        self.rotation = Rotation::zero();
-    }
+//     fn apply_rotation(&mut self) {
+//         for vert in self.vertecies.iter_mut() {
+//             vert.rotate(self.rotation.into());
+//         }
+//         self.rotation = Rotation::zero();
+//     }
 
-    fn apply_all_transforms(&mut self) {
-        for vert in self.vertecies.iter_mut() {
-            vert.translate(self.position);
-            vert.scale(self.scale);
-            vert.rotate(self.rotation.into());
-        }
+//     fn apply_all_transforms(&mut self) {
+//         for vert in self.vertecies.iter_mut() {
+//             vert.translate(self.position);
+//             vert.scale(self.scale);
+//             vert.rotate(self.rotation.into());
+//         }
 
-        self.position = Translation::zero();
-        self.scale = Scale::zero();
-        self.rotation = Rotation::zero();
-    }
-}
+//         self.position = Translation::zero();
+//         self.scale = Scale::zero();
+//         self.rotation = Rotation::zero();
+//     }
+// }
 
-impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
-    fn from(value: A) -> Self {
-        let vertecies = value.into();
-        Self {
-            name: None,
-            vertecies,
-            vert_indices: None,
-            norm_indices: None,
-            text_indices: None,
-            _texture: None,
+// impl<A: Into<Vec<Vertex>>> From<A> for Mesh {
+//     fn from(value: A) -> Self {
+//         let vertecies = value.into();
+//         Self {
+//             name: None,
+//             vertecies,
+//             vert_indices: None,
+//             norm_indices: None,
+//             text_indices: None,
+//             _texture: None,
 
-            position: Translation::zero(),
-            scale: Scale::zero(),
-            rotation: Rotation::zero(),
-        }
-    }
-}
+//             position: Translation::zero(),
+//             scale: Scale::zero(),
+//             rotation: Rotation::zero(),
+//         }
+//     }
+// }
 
-impl Mesh {
-    pub fn empty() -> Self {
-        vec![].into()
-    }
+// impl Mesh {
+//     pub fn empty() -> Self {
+//         vec![].into()
+//     }
 
-    pub fn from_verts_and_indices(vertecies: Vec<Vertex>, indices: Vec<u32>) -> Self {
-        Self {
-            name: None,
-            vertecies,
-            vert_indices: Some(indices.clone()),
-            norm_indices: Some(indices.clone()),
-            text_indices: Some(indices),
+//     pub fn from_verts_and_indices(vertecies: Vec<Vertex>, indices: Vec<u32>) -> Self {
+//         Self {
+//             name: None,
+//             vertecies,
+//             vert_indices: Some(indices.clone()),
+//             norm_indices: Some(indices.clone()),
+//             text_indices: Some(indices),
 
-            _texture: None,
-            position: Translation::zero(),
-            scale: Scale::zero(),
-            rotation: Rotation::zero(),
-        }
-    }
-}
+//             _texture: None,
+//             position: Translation::zero(),
+//             scale: Scale::zero(),
+//             rotation: Rotation::zero(),
+//         }
+//     }
+// }
 
-impl Mesh {
-    pub fn vertecies_number(&self) -> usize {
-        self.vertecies.len()
-    }
+// impl Mesh {
+//     pub fn vertecies_number(&self) -> usize {
+//         self.vertecies.len()
+//     }
 
-    pub fn load_into_vertex_buffer(&self, buffer: &mut VertexBuffer<Vertex>) {
-        let vertecies: Vec<Vertex> = self
-            .vertecies
-            .iter()
-            .map(|vert| vert.get_transform(self.position, self.scale, self.rotation.into()))
-            .collect();
+//     pub fn load_into_vertex_buffer(&self, buffer: &mut VertexBuffer<Vertex>) {
+//         let vertecies: Vec<Vertex> = self
+//             .vertecies
+//             .iter()
+//             .map(|vert| vert.get_transform(self.position, self.scale, self.rotation.into()))
+//             .collect();
 
-        buffer.write(&vertecies);
-    }
+//         buffer.write(&vertecies);
+//     }
 
-    pub fn to_index_buffer<F: glium::backend::Facade>(
-        &self,
-        facade: &F,
-    ) -> Result<glium::index::IndexBuffer<u32>, glium::index::BufferCreationError> {
-        if let Some(ref indice) = self.vert_indices {
-            glium::index::IndexBuffer::new(
-                facade,
-                glium::index::PrimitiveType::TrianglesList,
-                indice,
-            )
-        } else {
-            glium::index::IndexBuffer::new(facade, glium::index::PrimitiveType::TrianglesList, &[])
-        }
-    }
-}
+//     pub fn to_index_buffer<F: glium::backend::Facade>(
+//         &self,
+//         facade: &F,
+//     ) -> Result<glium::index::IndexBuffer<u32>, glium::index::BufferCreationError> {
+//         if let Some(ref indice) = self.vert_indices {
+//             glium::index::IndexBuffer::new(
+//                 facade,
+//                 glium::index::PrimitiveType::TrianglesList,
+//                 indice,
+//             )
+//         } else {
+//             glium::index::IndexBuffer::new(facade, glium::index::PrimitiveType::TrianglesList, &[])
+//         }
+//     }
+// }
 
 pub enum MeshRenderError {
     VertexBufferCreationError(glium::vertex::BufferCreationError),
@@ -192,37 +201,37 @@ pub enum MeshRenderError {
     IndiceBufferCreationError(glium::index::BufferCreationError),
 }
 
-impl Renderable for Mesh {
-    type RenderError = MeshRenderError;
+// impl Renderable for Mesh {
+//     type RenderError = MeshRenderError;
 
-    fn render<F: glium::backend::Facade>(
-        &self,
-        facade: &F,
-        program: &glium::Program,
-        target: &mut glium::Frame,
-        uniforms: &glium::uniforms::UniformsStorage<
-            impl glium::uniforms::AsUniformValue,
-            impl glium::uniforms::Uniforms,
-        >,
-        draw_parameters: &glium::DrawParameters,
-    ) -> Result<(), Self::RenderError> {
-        let mut vertex_buffer: VertexBuffer<Vertex> =
-            glium::VertexBuffer::empty(facade, self.vertecies_number())
-                .map_err(MeshRenderError::VertexBufferCreationError)?;
-        self.load_into_vertex_buffer(&mut vertex_buffer);
+//     fn render<F: glium::backend::Facade>(
+//         &self,
+//         facade: &F,
+//         program: &glium::Program,
+//         target: &mut glium::Frame,
+//         uniforms: &glium::uniforms::UniformsStorage<
+//             impl glium::uniforms::AsUniformValue,
+//             impl glium::uniforms::Uniforms,
+//         >,
+//         draw_parameters: &glium::DrawParameters,
+//     ) -> Result<(), Self::RenderError> {
+//         let mut vertex_buffer: VertexBuffer<Vertex> =
+//             glium::VertexBuffer::empty(facade, self.vertecies_number())
+//                 .map_err(MeshRenderError::VertexBufferCreationError)?;
+//         self.load_into_vertex_buffer(&mut vertex_buffer);
 
-        let index_buffer = self
-            .to_index_buffer(facade)
-            .map_err(MeshRenderError::IndiceBufferCreationError)?;
+//         let index_buffer = self
+//             .to_index_buffer(facade)
+//             .map_err(MeshRenderError::IndiceBufferCreationError)?;
 
-        target
-            .draw(
-                &vertex_buffer,
-                &index_buffer,
-                program,
-                uniforms,
-                draw_parameters,
-            )
-            .map_err(MeshRenderError::DrawError)
-    }
-}
+//         target
+//             .draw(
+//                 &vertex_buffer,
+//                 &index_buffer,
+//                 program,
+//                 uniforms,
+//                 draw_parameters,
+//             )
+//             .map_err(MeshRenderError::DrawError)
+//     }
+// }

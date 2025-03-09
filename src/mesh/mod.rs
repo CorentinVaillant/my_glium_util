@@ -6,11 +6,7 @@ pub mod vertex;
 #[cfg(test)]
 mod test;
 
-
-
-use std::rc::Rc;
-
-use mesh_inners::{InnerMeshRef, MeshVertex};
+use mesh_inners::{InnerMeshRef, MeshVertex, TriangleMesh};
 use vertex::Vertex;
 
 use crate::object_traits::{
@@ -32,12 +28,16 @@ pub struct Mesh {
 //? https://github.com/D-BookeR/Synthese-d-images-avec-OpenGL
 impl Mesh {
     fn add_vertex(&mut self, vertex:Vertex)->Result<(),std::cell::BorrowMutError>{
-        self.push_vertex(MeshVertex::new(Some(self.inner_mesh.clone()), vertex))
+        self.push_vertex(MeshVertex::new(Some(self), vertex))
     }
 
     fn push_vertex(&mut self,vertex:MeshVertex)->Result<(),std::cell::BorrowMutError>{
         self.inner_mesh.try_borrow_mut()?.vertex_list.push(vertex);
         Ok(())
+    }
+
+    fn push_triangle(&mut self, triangle:TriangleMesh){
+        todo!()
     }
 }
 

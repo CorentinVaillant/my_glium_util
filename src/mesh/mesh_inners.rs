@@ -6,7 +6,8 @@ use super::{vertex::Vertex, Mesh};
 
 #[derive(Debug)]
 pub(crate) struct InnerMesh{
-    pub(crate) vertex_list: Vec<MeshVertex>
+    pub(crate) vertex_list: Vec<MeshVertex>,
+    pub(crate) triangle_list: Vec<TriangleMesh>
 }
 
 pub(crate) type InnerMeshRef = Rc<RefCell<InnerMesh>>;
@@ -24,7 +25,7 @@ pub(crate) struct HalfEdgeMesh {
     pub(crate) origin: Rc<MeshVertex>,
 
     pub(crate) mesh: Option<Rc<Mesh>>,
-    pub(crate) triangle: Rc<TriangleMesh>,
+    pub(crate) triangle: Option<Rc<TriangleMesh>>,
     pub(crate) next: Option<HalfEdgeRef>,
     pub(crate) prev: Option<HalfEdgeRef>,
     pub(crate) oposite: Option<HalfEdgeRef>,
@@ -32,7 +33,7 @@ pub(crate) struct HalfEdgeMesh {
 }
 
 impl HalfEdgeMesh {
-    pub(crate) fn new(mesh:Option<Rc<Mesh>>,origin:Rc<MeshVertex>, _target:NotImpl, triangle:Rc<TriangleMesh>) -> HalfEdgeRef {
+    pub(crate) fn new(mesh:Option<Rc<Mesh>>,origin:Rc<MeshVertex>, _target:NotImpl, triangle:Option<Rc<TriangleMesh>>) -> HalfEdgeRef {
         Rc::new(RefCell::new(HalfEdgeMesh {
             origin,
             mesh,
@@ -188,8 +189,8 @@ pub(crate) struct MeshVertex{
 }
 
 impl MeshVertex{
-    pub(crate)fn new(mesh:Option<InnerMeshRef>,vertex:Vertex)->Self{
-        Self { vertex, half_edge: None, mesh }
+    pub(crate)fn new(mesh:Option<&Mesh>,vertex:Vertex)->Self{
+        Self { vertex, half_edge: None, mesh :mesh.map(|m|m.inner_mesh.clone())}
     }
 
     pub(crate) fn get_vertex(&self)->&Vertex{
@@ -205,6 +206,22 @@ impl MeshVertex{
 
 #[derive(Debug)]
 pub(crate) struct TriangleMesh{
+    mesh : Option<InnerMeshRef>,
     vertices : [Rc<MeshVertex>;3]
 }
 
+impl TriangleMesh {
+    pub(crate) fn new(mesh:Option<&Mesh>, [v1,v2,v3]:[Vertex;3])-> Self{
+
+        let [v1,v2,v3] = [v1,v2,v3].map(Rc::new);
+
+        let v1 = HalfEdgeMesh::new(mesh, v1.clone(), v2.clone(), None);
+
+        let triangle = TriangleMesh { mesh:mesh.map(|m|m.inner_mesh.clone()), vertices };
+
+
+
+        mesh.map(|m| m.push_triangle(triangle))
+
+    }
+}

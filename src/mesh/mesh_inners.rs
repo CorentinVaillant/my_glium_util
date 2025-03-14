@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::{Rc, Weak}};
+use std::{cell::RefCell, ptr, rc::{Rc, Weak}};
 
 use crate::file_parser::NotImpl;
 
@@ -18,43 +18,55 @@ pub(crate) type InnerMeshRef = Rc<RefCell<InnerMesh>>;
 *                     *
 \**********************/
 
-type HalfEdgeRef = Rc<RefCell<HalfEdgeMesh>>;
+pub(crate)type MeshHalfEdgeRef = Rc<RefCell<MeshHalfEdge>>;
 
 #[derive(Debug)]
-pub(crate) struct HalfEdgeMesh {
+pub(crate) struct MeshHalfEdge {
     pub(crate) origin: Rc<MeshVertex>,
 
-    pub(crate) mesh: Option<Rc<Mesh>>,
-    pub(crate) triangle: Option<Rc<TriangleMesh>>,
-    pub(crate) next: Option<HalfEdgeRef>,
-    pub(crate) prev: Option<HalfEdgeRef>,
-    pub(crate) oposite: Option<HalfEdgeRef>,
-    pub(crate) sibling: Option<HalfEdgeRef>
+    pub(crate) mesh: Option<InnerMeshRef>,
+    pub(crate) triangle: Option<TriangleMeshRef>,
+    pub(crate) next: Option<MeshHalfEdgeRef>,
+    pub(crate) prev: Option<MeshHalfEdgeRef>,
+    pub(crate) oposite: Option<MeshHalfEdgeRef>,
+    pub(crate) sibling: Option<MeshHalfEdgeRef>
 }
 
-impl HalfEdgeMesh {
-    pub(crate) fn new(mesh:Option<Rc<Mesh>>,origin:Rc<MeshVertex>, _target:NotImpl, triangle:Option<Rc<TriangleMesh>>) -> HalfEdgeRef {
-        Rc::new(RefCell::new(HalfEdgeMesh {
+impl MeshHalfEdge {
+    pub(crate) fn new(mesh:Option<&mut Mesh>,origin:MeshVertexRef, target:MeshVertexRef, triangle:Option<TriangleMeshRef>) -> MeshHalfEdgeRef {
+        let result = Rc::new(RefCell::new(MeshHalfEdge {
             origin,
-            mesh,
+            mesh : mesh.as_deref().map(|m|m.inner_mesh.clone()),
             triangle,
             next: None,
             prev: None,
             oposite: None,
             sibling:None,
-        }))
+        }));
+
+        mesh.map(|m|m.push_halh_edge(result));
+
+        let other = target.half_edge
+
+
+
+        todo!()
+    }
+
+    pub(crate) fn get_target(&self)->Option<MeshVertexRef>{
+        self.next.clone().map(|he|he.borrow().origin.clone())
     }
 }
 
 pub(crate) struct HalfEdgeFaceIterator {
-    start_h_e: HalfEdgeRef,
-    curr_h_e: Option<HalfEdgeRef>,
+    start_h_e: MeshHalfEdgeRef,
+    curr_h_e: Option<MeshHalfEdgeRef>,
 
     started: bool,
 }
 
 impl HalfEdgeFaceIterator {
-    pub(crate) fn new(start: HalfEdgeRef) -> Self {
+    pub(crate) fn new(start: MeshHalfEdgeRef) -> Self {
         Self {
             start_h_e: start.clone(),
             curr_h_e: Some(start),
@@ -89,7 +101,7 @@ impl Iterator for HalfEdgeFaceIterator {
 }
 
 pub(crate) struct HalfEdgeFace {
-    pub(super) origin: HalfEdgeRef,
+    pub(super) origin: MeshHalfEdgeRef,
 }
 
 impl HalfEdgeFace {
@@ -98,80 +110,7 @@ impl HalfEdgeFace {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub(crate) enum FromVertSliceError {
-    //Should have at least 3 vertecies !
-    NotEnoughVertices,
-}
 
-// impl TryFrom<&[Rc<MeshVertex>]> for HalfEdgeFace {
-//     type Error = FromVertSliceError;
-
-//     fn try_from(vertices: &[Rc<MeshVertex>]) -> Result<Self, Self::Error> {
-//         if vertices.len() < 3 {
-//             Err(FromVertSliceError::NotEnoughVertices)
-//         } else {
-//             // Create half-edges for each vertex
-//             let edges: Vec<HalfEdgeRef> = vertices
-//                 .iter()
-//                 .map(|v| HalfEdgeMesh::new(Rc::clone(v)))
-//                 .collect();
-
-//             let len = edges.len();
-//             for i in 0..len {
-//                 let next_id = (i + 1) % len;
-//                 let prev_id = (i + len - 1) % len;
-
-//                 // Link the half-edges in a circular fashion
-//                 edges[i].borrow_mut().next = Some(Rc::clone(&edges[next_id]));
-//                 edges[i].borrow_mut().prev = Some(Rc::clone(&edges[prev_id]));
-//             }
-
-//             Ok(Self {
-//                 origin: edges[0].clone(),
-//             })
-//         }
-//     }
-// }
-
-// impl<const N: usize> TryFrom<[Rc<Vertex>; N]> for HalfEdgeFace {
-//     type Error = FromVertSliceError;
-
-//     fn try_from(vertices: [Rc<Vertex>; N]) -> Result<Self, Self::Error> {
-//         if N < 3 {
-//             Err(FromVertSliceError::NotEnoughVertices)
-//         } else {
-//             let edges: Vec<HalfEdgeRef> = vertices
-//                 .iter()
-//                 .map(|v| HalfEdgeMesh::new(Rc::clone(v)))
-//                 .collect();
-
-//             for i in 0..N {
-//                 let next_id = (i + 1) % N;
-//                 let prev_id = (i + N - 1) % N;
-
-//                 // Link the half-edges to form a closed loop
-//                 edges[i].borrow_mut().next = Some(Rc::clone(&edges[next_id]));
-//                 edges[i].borrow_mut().prev = Some(Rc::clone(&edges[prev_id]));
-//             }
-
-//             Ok(Self {
-//                 origin: edges[0].clone(),
-//             })
-//         }
-//     }
-// }
-
-// impl<const N: usize> From<Polygon<N>> for HalfEdgeFace {
-//     fn from(polygon: Polygon<N>) -> Self {
-//         polygon
-//             .vertices
-//             .map(Rc::new)
-//             // A polygon have at least 3 vertices, the try_into always succeed
-//             .try_into()
-//             .expect("something went wrong inside From<Polygon<N>> for HalfEdgeFace")
-//     }
-// }
 
 /********************\
 *                   *
@@ -184,9 +123,10 @@ pub(crate) struct MeshVertex{
     vertex : Vertex, 
 
     mesh : Option<InnerMeshRef>,
-    half_edge : Option<Weak<HalfEdgeMesh>>,
-    
+    half_edge : Option<MeshHalfEdgeRef>,
 }
+
+pub(crate) type MeshVertexRef = Rc<MeshVertex>;
 
 impl MeshVertex{
     pub(crate)fn new(mesh:Option<&Mesh>,vertex:Vertex)->Self{
@@ -195,6 +135,21 @@ impl MeshVertex{
 
     pub(crate) fn get_vertex(&self)->&Vertex{
         &self.vertex
+    }
+
+    pub(crate) fn get_half_edge_to(&self, vertex:MeshVertexRef)->Option<MeshHalfEdgeRef>{
+        let mut opt_half_edge = self.half_edge.clone();
+        let vertex = Some(vertex.as_ref() as *const MeshVertex);
+
+        while let Some(ref half_edge) =  opt_half_edge{
+            if half_edge.borrow().get_target().map(|v|v.as_ref() as *const MeshVertex) == vertex {
+                return opt_half_edge;}
+            opt_half_edge = half_edge.borrow().sibling.clone()
+        }
+
+        todo!()
+
+
     }
 }
 
@@ -207,21 +162,39 @@ impl MeshVertex{
 #[derive(Debug)]
 pub(crate) struct TriangleMesh{
     mesh : Option<InnerMeshRef>,
-    vertices : [Rc<MeshVertex>;3]
+    vertices : [Rc<MeshVertex>;3],
+    half_edge: MeshHalfEdgeRef
 }
 
+pub(crate) type TriangleMeshRef = Rc<RefCell<TriangleMesh>>;
+
 impl TriangleMesh {
-    pub(crate) fn new(mesh:Option<&Mesh>, [v1,v2,v3]:[Vertex;3])-> Self{
-
-        let [v1,v2,v3] = [v1,v2,v3].map(Rc::new);
-
-        let v1 = HalfEdgeMesh::new(mesh, v1.clone(), v2.clone(), None);
-
-        let triangle = TriangleMesh { mesh:mesh.map(|m|m.inner_mesh.clone()), vertices };
+    pub(crate) fn new(mesh:&mut Option<Mesh>, vertices:[Vertex;3])-> TriangleMeshRef{
 
 
+        let vertices = vertices.map(|v|Rc::new(MeshVertex::new(mesh.as_ref(), v)));
+        let half_edges = vertices.clone().map(|v|MeshHalfEdge::new(mesh.as_mut(), v, (), None));
+        for i in 0..3{
+            half_edges[i].borrow_mut().next = Some(half_edges[(i+1)%3].clone());
+        }
 
-        mesh.map(|m| m.push_triangle(triangle))
+        let [h1,h2,h3] = half_edges;
+
+        let result = Rc::new(RefCell::new(
+        Self{
+            mesh: mesh.as_mut().map(|m|m.inner_mesh.clone()),
+            vertices,
+            half_edge: h1.clone()
+        }));
+
+        h1.borrow_mut().triangle = Some(result.clone());
+        h2.borrow_mut().triangle = Some(result.clone());
+        h3.borrow_mut().triangle = Some(result.clone());
+        mesh.as_mut().map(|m| m.push_triangle(result.clone()));
+
+        result
+
+
 
     }
 }

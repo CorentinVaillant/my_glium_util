@@ -32,21 +32,31 @@ pub(crate) struct MeshHalfEdge {
     pub(crate) sibling: Option<MeshHalfEdgeRef>
 }
 
+pub(crate) type NonManifoldMesh = ();
+
 impl MeshHalfEdge {
-    pub(crate) fn new(mesh:Option<&mut Mesh>,origin:MeshVertexRef, target:MeshVertexRef, triangle:Option<TriangleMeshRef>) -> MeshHalfEdgeRef {
-        let result = Rc::new(RefCell::new(MeshHalfEdge {
-            origin,
+    pub(crate) fn new(mesh:Option<&mut Mesh>,origin:MeshVertexRef, target:MeshVertexRef, triangle:Option<TriangleMeshRef>) -> Result<MeshHalfEdgeRef,NonManifoldMesh> {
+        let mut result = MeshHalfEdge {
+            origin:origin.clone(),
             mesh : mesh.as_deref().map(|m|m.inner_mesh.clone()),
             triangle,
             next: None,
             prev: None,
             oposite: None,
             sibling:None,
-        }));
+        };
 
         mesh.map(|m|m.push_halh_edge(result));
 
-        let other = target.half_edge
+        let other = target.get_half_edge_to(origin);
+        if other.is_some(){
+            if other.is_some_and(|o|o.borrow().oposite.is_some()){
+                return Err(());
+            }
+            //!here
+            result.oposite = other;
+
+        }
 
 
 

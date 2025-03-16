@@ -6,7 +6,7 @@ pub mod vertex;
 #[cfg(test)]
 mod test;
 
-use mesh_inners::{MeshHalfEdgeRef, InnerMeshRef, MeshHalfEdge, MeshVertex, TriangleMesh, TriangleMeshRef};
+use mesh_inners::{InnerMeshRef, MeshHalfEdgeRef, MeshVertex, MeshVertexRef, TriangleMeshRef};
 use vertex::Vertex;
 
 use crate::object_traits::{
@@ -36,11 +36,15 @@ impl Mesh {
         Ok(())
     }
 
-    fn push_triangle(&mut self, triangle:TriangleMeshRef){
+    fn push_triangle(&mut self, _triangle:TriangleMeshRef){
         todo!()
     }
 
-    fn push_halh_edge(&mut self, half_edge:MeshHalfEdgeRef){
+    fn push_halh_edge(&mut self, _half_edge:MeshHalfEdgeRef){
+        todo!()
+    }
+
+    fn pop_vertex(&mut self, _vertex:MeshVertexRef){
         todo!()
     }
 }
